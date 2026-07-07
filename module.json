@@ -1,0 +1,33 @@
+{
+  "id": "paranormal-fx",
+  "title": "Paranormal FX",
+  "version": "0.1.0",
+  "compatibility": {
+    "minimum": "14",
+    "verified": "14"
+  },
+  "authors": [
+    {
+      "name": "Mercy",
+      "flags": {}
+    }
+  ],
+  "flags": {
+    "canUpload": true
+  },
+  "relationships": {
+    "requires": [
+      {
+        "id": "sequencer",
+        "type": "module",
+        "compatibility": {}
+      },
+      {
+        "id": "JB2A_DnD5e",
+        "type": "module",
+        "compatibility": {}
+      }
+    ]
+  },
+  "description": ""
+}

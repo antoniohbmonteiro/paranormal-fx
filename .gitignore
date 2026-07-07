@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.yarn/
+.yarn-cache/
+
+# Build output
+dist/
+build/
+coverage/
+.nyc_output/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Foundry local/dev artifacts
+Data/
+data/
+worlds/
+cache/
+storage/
+uploads/
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+
+# Foundry package archives
+*.zip
+*.tgz
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE/editor
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+.idea/
+*.swp
+*.swo
+
+# TypeScript
+*.tsbuildinfo
+
+# Vite
+.vite/
+
+# Test output
+test-results/
+playwright-report/
+
+# Temporary files
+tmp/
+temp/
