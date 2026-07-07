@@ -1,6 +1,10 @@
 import type { RitualFxPreset } from "../ritual-fx-preset";
 
-export function createEletrocussaoStudentRectangleRayPreset(effectPath: string): RitualFxPreset {
+export const ELETROCUSSAO_STUDENT_RECTANGLE_RAY_EFFECT_PATH = "jb2a.chain_lightning.primary.blue.60ft";
+
+export function createEletrocussaoStudentRectangleRayPreset(
+  effectPath = ELETROCUSSAO_STUDENT_RECTANGLE_RAY_EFFECT_PATH,
+): RitualFxPreset {
   return {
     id: "ritual.eletrocussao.student.rectangleRay",
     label: "Eletrocussão Discente - Linha",
@@ -10,5 +14,6 @@ export function createEletrocussaoStudentRectangleRayPreset(effectPath: string):
       areaType: "rectangleRay",
     },
     effectPath,
+    placementMode: "rectangleRayLine",
   };
 }

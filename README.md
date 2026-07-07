@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.1.0
+0.1.2
 ```
 
 ## Objetivo
@@ -43,6 +43,27 @@ A biblioteca JB2A deve estar instalada e ativa no Foundry. Este módulo não emp
 
 - Foundry VTT v14+
 - Sistema alvo: `ordemparanormal`
+
+
+## Presets iniciais
+
+### Eletrocussão Discente
+
+O primeiro preset visual acompanha o evento público de ritual do Paranormal Toolkit:
+
+```txt
+ritual.eletrocussao
+form: student
+areaType: rectangleRay
+```
+
+O efeito usa o caminho do banco do Sequencer/JB2A:
+
+```txt
+jb2a.chain_lightning.primary.blue.60ft
+```
+
+A animação é posicionada como uma linha de área: começa no início da `rectangleRay` resolvida pelo Toolkit e estica até o fim da linha. Os alvos não definem o caminho visual; eles apenas são consequência dos quadrados cobertos pela área.
 
 ## Desenvolvimento
 
@@ -104,3 +125,8 @@ Sequencer adapter
 Código distribuído sob a licença MIT. Veja o arquivo `LICENSE`.
 
 Assets, animações e sons de terceiros não são redistribuídos por este módulo.
+
+
+### 0.1.2
+
+- Corrige o posicionamento da linha de FX ao rotacionar `rectangleRay`, usando o início real da forma retangular e sua direção para calcular o fim da área.

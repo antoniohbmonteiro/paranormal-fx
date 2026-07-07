@@ -1,6 +1,7 @@
+import { MODULE_ID } from "../../config/module-constants";
 import { logger } from "../../core/logger";
-import type { NormalizedRitualFxContext } from "../toolkit/toolkit-payloads";
 import type { RitualFxPreset } from "../../features/ritual-fx/ritual-fx-preset";
+import type { RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
 
 type SequenceConstructor = new (options?: Record<string, unknown>) => SequenceLike;
 
@@ -25,7 +26,7 @@ function getSequenceConstructor(): SequenceConstructor | null {
 }
 
 export class SequencerAdapter {
-  async playRitualPreset(preset: RitualFxPreset, context: NormalizedRitualFxContext): Promise<void> {
+  async playRitualPreset(preset: RitualFxPreset, placement: RitualFxPlacement): Promise<void> {
     const Sequence = getSequenceConstructor();
     if (!Sequence) {
       logger.warn("Sequencer API is not available at runtime.");
@@ -37,22 +38,23 @@ export class SequencerAdapter {
       return;
     }
 
-    const sequence = new Sequence({ moduleName: "paranormal-fx" });
+    const sequence = new Sequence({ moduleName: MODULE_ID });
     const effect = sequence.effect().name(preset.id).file(preset.effectPath);
 
-    // First pass: keep playback conservative. Real area placement is implemented per preset
-    // after we pick the exact JB2A asset and understand its orientation requirements.
-    const location = resolveFallbackLocation(context);
-    if (location) effect.atLocation(location);
+    applyPlacement(effect, placement);
 
     if (preset.scale) effect.scale(preset.scale);
 
     await sequence.play();
-    logger.debug("Played ritual FX preset", { preset: preset.id, context });
+    logger.debug("Played ritual FX preset", { preset: preset.id, placement });
   }
 }
 
-function resolveFallbackLocation(context: NormalizedRitualFxContext): unknown | null {
-  const targets = context.sourcePayload.event?.targets;
-  return Array.isArray(targets) && targets.length > 0 ? targets[0] : null;
+function applyPlacement(effect: SequenceEffectLike, placement: RitualFxPlacement): void {
+  if (placement.type === "line") {
+    effect.atLocation(placement.start).stretchTo(placement.end);
+    return;
+  }
+
+  effect.atLocation(placement.location);
 }

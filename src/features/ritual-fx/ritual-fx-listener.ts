@@ -16,8 +16,9 @@ export function registerRitualFxListeners(orchestrator = new RitualFxOrchestrato
   });
 
   Hooks.on(TOOLKIT_HOOKS.ritualAreaResolved, (payload: ToolkitRitualLifecyclePayload) => {
-    if (payload.castId && payload.event?.area) {
-      areaByCastId.set(payload.castId, payload.event.area);
+    const area = payload.area ?? payload.event?.area;
+    if (payload.castId && area) {
+      areaByCastId.set(payload.castId, area);
     }
 
     logger.debug("Ritual area resolved", payload);

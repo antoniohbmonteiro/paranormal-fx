@@ -6,10 +6,13 @@ export interface RitualFxPresetMatch {
   areaType?: ToolkitAreaType;
 }
 
+export type RitualFxPlacementMode = "rectangleRayLine" | "firstTarget";
+
 export interface RitualFxPreset {
   id: string;
   label: string;
   match: RitualFxPresetMatch;
   effectPath: string | null;
+  placementMode: RitualFxPlacementMode;
   scale?: number;
 }
