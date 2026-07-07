@@ -1,0 +1,25 @@
+{
+  "name": "paranormal-fx",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Visual and sound effects for Paranormal Toolkit automations in Foundry VTT.",
+  "scripts": {
+    "build": "vite build",
+    "dev": "vite build --watch",
+    "typecheck": "tsc --noEmit",
+    "check": "npm run typecheck && npm run build"
+  },
+  "keywords": [
+    "foundry-vtt",
+    "ordem-paranormal",
+    "sequencer",
+    "jb2a"
+  ],
+  "author": "Antonio Monteiro",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4"
+  }
+}

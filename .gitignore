@@ -4,11 +4,15 @@ node_modules/
 .yarn/
 .yarn-cache/
 
-# Build output
-dist/
-build/
+# Vite / TypeScript
+.vite/
+*.tsbuildinfo
+
+# Coverage and test output
 coverage/
 .nyc_output/
+test-results/
+playwright-report/
 
 # Logs
 *.log
@@ -52,16 +56,6 @@ desktop.ini
 .idea/
 *.swp
 *.swo
-
-# TypeScript
-*.tsbuildinfo
-
-# Vite
-.vite/
-
-# Test output
-test-results/
-playwright-report/
 
 # Temporary files
 tmp/

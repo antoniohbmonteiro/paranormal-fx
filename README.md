@@ -10,7 +10,7 @@ O módulo foi pensado para funcionar junto com o **Paranormal Toolkit**, escutan
 
 Projeto em fase inicial.
 
-Versão inicial planejada:
+Versão atual:
 
 ```txt
 0.1.0
@@ -31,7 +31,7 @@ Responsabilidades:
 
 ## Dependências
 
-Dependências planejadas:
+Dependências atuais:
 
 - Paranormal Toolkit
 - Sequencer
@@ -46,19 +46,57 @@ A biblioteca JB2A deve estar instalada e ativa no Foundry. Este módulo não emp
 
 ## Desenvolvimento
 
-A arquitetura final será baseada em TypeScript, Vite e ES Modules.
+Instale as dependências:
 
-Estrutura planejada:
+```bash
+npm install
+```
+
+Valide o projeto:
+
+```bash
+npm run check
+```
+
+Gere o bundle:
+
+```bash
+npm run build
+```
+
+Modo watch:
+
+```bash
+npm run dev
+```
+
+## Estrutura
 
 ```txt
 src/
   main.ts
   config/
   adapters/
+    toolkit/
+    sequencer/
   core/
   features/
+    ritual-fx/
   types/
-  utils/
+```
+
+## Fluxo inicial
+
+```txt
+Paranormal Toolkit hook
+↓
+Ritual FX listener
+↓
+Ritual FX orchestrator
+↓
+Preset registry
+↓
+Sequencer adapter
 ```
 
 ## Licença
