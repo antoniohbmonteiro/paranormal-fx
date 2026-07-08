@@ -1,7 +1,7 @@
 import { MODULE_ID } from "../../config/module-constants";
 import { logger } from "../../core/logger";
 import type { RitualFxPreset } from "../../features/ritual-fx/ritual-fx-preset";
-import { createPlacementSummary, type RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
+import type { RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
 
 type SequenceConstructor = new (options?: Record<string, unknown>) => SequenceLike;
 
@@ -38,35 +38,67 @@ export class SequencerAdapter {
       return;
     }
 
-    logger.debug("Preparing Sequencer ritual FX", {
-      preset: preset.id,
-      effectPath: preset.effectPath,
-      placement: createPlacementSummary(placement),
-    });
+    if (placement.type === "lineGroup") {
+      await this.playLineGroupPreset(Sequence, preset, placement);
+      logger.debug("Played ritual FX preset", { preset: preset.id, placement });
+      return;
+    }
 
+    await this.playSinglePreset(Sequence, preset, placement);
+    logger.debug("Played ritual FX preset", { preset: preset.id, placement });
+  }
+
+  private async playLineGroupPreset(
+    Sequence: SequenceConstructor,
+    preset: RitualFxPreset,
+    placement: Extract<RitualFxPlacement, { type: "lineGroup" }>,
+  ): Promise<void> {
+    const staggerMs = Math.max(0, placement.staggerMs ?? preset.staggerMs ?? 0);
+
+    for (const [index, line] of placement.lines.entries()) {
+      const singlePlacement: Extract<RitualFxPlacement, { type: "line" }> = {
+        type: "line",
+        start: line.start,
+        end: line.end,
+      };
+
+      void this.playSinglePreset(Sequence, preset, singlePlacement, `${preset.id}.${index}`);
+
+      if (index < placement.lines.length - 1 && staggerMs > 0) {
+        await delay(staggerMs);
+      }
+    }
+  }
+
+  private async playSinglePreset(
+    Sequence: SequenceConstructor,
+    preset: RitualFxPreset,
+    placement: Exclude<RitualFxPlacement, { type: "lineGroup" }>,
+    effectName = preset.id,
+  ): Promise<void> {
     const sequence = new Sequence({ moduleName: MODULE_ID });
-    const effect = sequence.effect().name(preset.id).file(preset.effectPath);
+    const effect = sequence.effect().name(effectName).file(preset.effectPath as string);
 
     applyPlacement(effect, placement);
 
     if (preset.scale) effect.scale(preset.scale);
 
     await sequence.play();
-    logger.debug("Played ritual FX preset", {
-      preset: preset.id,
-      effectPath: preset.effectPath,
-      placement: createPlacementSummary(placement),
-    });
   }
 }
 
-function applyPlacement(effect: SequenceEffectLike, placement: RitualFxPlacement): void {
+function applyPlacement(
+  effect: SequenceEffectLike,
+  placement: Exclude<RitualFxPlacement, { type: "lineGroup" }>,
+): void {
   if (placement.type === "line") {
-    logger.debug("Applying Sequencer line placement", createPlacementSummary(placement));
     effect.atLocation(placement.start).stretchTo(placement.end);
     return;
   }
 
-  logger.debug("Applying Sequencer point placement", createPlacementSummary(placement));
   effect.atLocation(placement.location);
+}
+
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }

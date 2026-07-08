@@ -1,5 +1,12 @@
 # Roadmap
 
+## 0.2.1
+
+- Adicionar preset visual para Eletrocussão Verdadeira (`form: true`).
+- Posicionar um raio do conjurador até cada alvo confirmado.
+- Aplicar atraso de 500 ms entre os disparos, sem depender de rotação/facing do token.
+- Manter Eletrocussão Padrão e Discente sem alteração de regra.
+
 ## 0.2.0
 
 - Adicionar preset visual para Eletrocussão Padrão (`form: standard`).
@@ -43,7 +50,6 @@
 
 ## Próximos passos
 
-- Adicionar Eletrocussão Verdadeira com múltiplos alvos e delay entre disparos.
 - Melhorar cálculo de variantes JB2A por tamanho real da área.
 - Adicionar settings para ativar/desativar presets.
 - Adicionar suporte a som por preset.

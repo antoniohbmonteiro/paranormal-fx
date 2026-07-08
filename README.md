@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.2.0
+0.2.1
 ```
 
 ## Objetivo
@@ -81,6 +81,23 @@ jb2a.chain_lightning.primary.blue.60ft
 ```
 
 A animação é posicionada como uma linha de área: começa no início da `rectangleRay` resolvida pelo Toolkit e estica até o fim da linha. Os alvos não definem o caminho visual; eles apenas são consequência dos quadrados cobertos pela área.
+
+### Eletrocussão Verdadeira
+
+Preset visual para o evento público de ritual do Paranormal Toolkit:
+
+```txt
+ritual.eletrocussao
+form: true
+```
+
+O efeito usa o caminho do banco do Sequencer/JB2A:
+
+```txt
+jb2a.chain_lightning.primary.blue.60ft
+```
+
+A animação é posicionada do conjurador até cada alvo confirmado. Cada disparo sai da borda do token do conjurador voltada para o alvo correspondente e começa com atraso de 500 ms entre um raio e o próximo.
 
 ## Desenvolvimento
 
@@ -177,3 +194,9 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 - Adiciona FX para Eletrocussão Padrão em alvo único.
 - A animação parte da borda do token do conjurador no lado do alvo e estica até o centro do alvo.
 - Mantém Eletrocussão Discente usando a linha da `rectangleRay`.
+
+### 0.2.1
+
+- Adiciona FX para Eletrocussão Verdadeira com múltiplos alvos.
+- Cada raio parte da borda do token do conjurador até o centro do alvo correspondente.
+- Aplica atraso de 500 ms entre o início de cada disparo.

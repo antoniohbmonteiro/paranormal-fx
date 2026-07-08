@@ -19,7 +19,7 @@ export interface CanvasBounds {
 }
 
 export interface RitualFxPlacementDiagnostics {
-  strategy: "explicitRay" | "rectangleShape" | "centerAndShape" | "bounds" | "sourceToTarget" | "firstTarget";
+  strategy: "explicitRay" | "rectangleShape" | "centerAndShape" | "bounds" | "sourceToTarget" | "sourceToTargets" | "firstTarget";
   area: RitualAreaDiagnostics | null;
   resolved?: {
     start?: CanvasPoint;
@@ -69,6 +69,17 @@ export type RitualFxPlacement =
       type: "line";
       start: CanvasPoint;
       end: CanvasPoint;
+      diagnostics?: RitualFxPlacementDiagnostics;
+    }
+  | {
+      type: "lineGroup";
+      lines: {
+        start: CanvasPoint;
+        end: CanvasPoint;
+        targetTokenId?: string | null;
+        targetTokenName?: string | null;
+      }[];
+      staggerMs?: number;
       diagnostics?: RitualFxPlacementDiagnostics;
     }
   | {
@@ -138,6 +149,26 @@ export function createPlacementSummary(placement: RitualFxPlacement | null): unk
     };
   }
 
+  if (placement.type === "lineGroup") {
+    return {
+      type: placement.type,
+      staggerMs: placement.staggerMs ?? 0,
+      lines: placement.lines.map((line) => {
+        const delta = calculateDelta(line.start, line.end);
+        return {
+          start: line.start,
+          end: line.end,
+          delta,
+          distance: calculateDistance(delta),
+          angleDegrees: calculateAngleDegrees(delta),
+          targetTokenId: line.targetTokenId ?? null,
+          targetTokenName: line.targetTokenName ?? null,
+        };
+      }),
+      diagnostics: placement.diagnostics ?? null,
+    };
+  }
+
   const delta = calculateDelta(placement.start, placement.end);
 
   return {
@@ -161,6 +192,10 @@ export function resolveRitualFxPlacement(
 
   if (preset.placementMode === "sourceToTargetLine") {
     return resolveSourceToTargetLinePlacement(context);
+  }
+
+  if (preset.placementMode === "sourceToEachTargetLine") {
+    return resolveSourceToEachTargetLinePlacement(context, preset.staggerMs ?? 500);
   }
 
   return resolveFirstTargetPlacement(context);
@@ -343,6 +378,59 @@ function resolveSourceToTargetLinePlacement(context: NormalizedRitualFxContext):
         sourceBounds: caster.bounds,
         targetBounds: target.bounds,
         startOffset: calculateDistance(calculateDelta(caster.center, start)),
+      },
+    },
+  };
+}
+
+function resolveSourceToEachTargetLinePlacement(
+  context: NormalizedRitualFxContext,
+  staggerMs: number,
+): RitualFxPlacement | null {
+  const casterReference = normalizeTokenReference(readPath(context.sourcePayload, "caster.token"));
+  if (!casterReference?.tokenId) return null;
+
+  const caster = resolveTokenGeometry(casterReference);
+  if (!caster) return null;
+
+  const seen = new Set<string>();
+  const lines = [];
+
+  for (const rawTarget of context.targets) {
+    const targetReference = normalizeTokenReference(rawTarget);
+    if (!targetReference?.tokenId) continue;
+    if (seen.has(targetReference.tokenId)) continue;
+
+    const target = resolveTokenGeometry(targetReference);
+    if (!target) continue;
+
+    const start = resolveEdgePointTowardTarget(caster, target.center);
+    const end = target.center;
+    if (pointsAreEqual(start, end)) continue;
+
+    seen.add(targetReference.tokenId);
+    lines.push({
+      start,
+      end,
+      targetTokenId: target.tokenId,
+      targetTokenName: target.name,
+    });
+  }
+
+  if (lines.length === 0) return null;
+
+  return {
+    type: "lineGroup",
+    lines,
+    staggerMs,
+    diagnostics: {
+      strategy: "sourceToTargets",
+      area: createRitualAreaDiagnostics(context.area),
+      resolved: {
+        sourceTokenId: caster.tokenId,
+        sourceTokenName: caster.name,
+        sourceCenter: caster.center,
+        sourceBounds: caster.bounds,
       },
     },
   };
