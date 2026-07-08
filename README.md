@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.1.3
+0.1.4
 ```
 
 ## Objetivo
@@ -120,6 +120,20 @@ Preset registry
 Sequencer adapter
 ```
 
+## Publicação
+
+O manifesto do Foundry aponta para o asset versionado da release mais recente:
+
+```txt
+https://github.com/antoniohbmonteiro/paranormal-fx/releases/latest/download/module.json
+```
+
+O pacote instalável deve ser publicado na release como:
+
+```txt
+paranormal-fx.zip
+```
+
 ## Licença
 
 Código distribuído sob a licença MIT. Veja o arquivo `LICENSE`.
@@ -135,3 +149,8 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 
 - Adiciona logs diagnósticos detalhados para investigar o posicionamento da `rectangleRay` rotacionada.
 - Os logs mostram payload bruto do Toolkit, resumo da área, direção recebida, start/end calculados, delta, distância e ângulo final enviado ao Sequencer.
+
+### 0.1.4
+
+- Configura `manifest` e `download` para publicação via GitHub Releases.
+- Não altera comportamento, presets, hooks, Sequencer ou integração JB2A.

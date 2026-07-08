@@ -1,5 +1,12 @@
 # Roadmap
 
+## 0.1.4
+
+- Configurar o manifesto para publicação via GitHub Releases.
+- Trocar o `manifest` para `releases/latest/download/module.json`.
+- Adicionar `download` apontando para o asset `paranormal-fx.zip` da release.
+- Não altera comportamento, presets, hooks, Sequencer ou integração JB2A.
+
 ## 0.1.3
 
 - Adicionar logs diagnósticos para confirmar se o Toolkit está enviando `shape.direction`, `ray.start/end`, `bounds`, `center` e `shape` corretamente.

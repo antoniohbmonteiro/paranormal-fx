@@ -1,7 +1,7 @@
 {
   "id": "paranormal-fx",
   "title": "Paranormal FX",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Efeitos visuais e sonoros para rituais e automações do Paranormal Toolkit, com integração ao Sequencer e bibliotecas JB2A instaladas pelo usuário.",
   "authors": [
     {
@@ -17,7 +17,8 @@
     "dist/main.js"
   ],
   "url": "https://github.com/antoniohbmonteiro/paranormal-fx",
-  "manifest": "https://raw.githubusercontent.com/antoniohbmonteiro/paranormal-fx/main/module.json",
+  "manifest": "https://github.com/antoniohbmonteiro/paranormal-fx/releases/latest/download/module.json",
+  "download": "https://github.com/antoniohbmonteiro/paranormal-fx/releases/latest/download/paranormal-fx.zip",
   "flags": {
     "canUpload": true
   },
