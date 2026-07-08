@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.1.4
+0.2.0
 ```
 
 ## Objetivo
@@ -47,9 +47,26 @@ A biblioteca JB2A deve estar instalada e ativa no Foundry. Este módulo não emp
 
 ## Presets iniciais
 
+### Eletrocussão Padrão
+
+Preset visual para o evento público de ritual do Paranormal Toolkit:
+
+```txt
+ritual.eletrocussao
+form: standard
+```
+
+O efeito usa o caminho do banco do Sequencer/JB2A:
+
+```txt
+jb2a.chain_lightning.primary.blue.60ft
+```
+
+A animação é posicionada como uma linha do conjurador até o alvo único. O ponto inicial é calculado na borda do token do conjurador, no lado voltado para o alvo, sem depender da rotação visual/facing do token.
+
 ### Eletrocussão Discente
 
-O primeiro preset visual acompanha o evento público de ritual do Paranormal Toolkit:
+Preset visual para o evento público de ritual do Paranormal Toolkit:
 
 ```txt
 ritual.eletrocussao
@@ -154,3 +171,9 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 
 - Configura `manifest` e `download` para publicação via GitHub Releases.
 - Não altera comportamento, presets, hooks, Sequencer ou integração JB2A.
+
+### 0.2.0
+
+- Adiciona FX para Eletrocussão Padrão em alvo único.
+- A animação parte da borda do token do conjurador no lado do alvo e estica até o centro do alvo.
+- Mantém Eletrocussão Discente usando a linha da `rectangleRay`.

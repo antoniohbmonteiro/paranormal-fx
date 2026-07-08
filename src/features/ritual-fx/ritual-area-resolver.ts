@@ -11,8 +11,15 @@ export interface CanvasPoint {
   y: number;
 }
 
+export interface CanvasBounds {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
 export interface RitualFxPlacementDiagnostics {
-  strategy: "explicitRay" | "rectangleShape" | "centerAndShape" | "bounds" | "firstTarget";
+  strategy: "explicitRay" | "rectangleShape" | "centerAndShape" | "bounds" | "sourceToTarget" | "firstTarget";
   area: RitualAreaDiagnostics | null;
   resolved?: {
     start?: CanvasPoint;
@@ -26,6 +33,15 @@ export interface RitualFxPlacementDiagnostics {
     directionRadians?: number;
     lengthVector?: CanvasPoint;
     perpendicularVector?: CanvasPoint;
+    sourceTokenId?: string | null;
+    targetTokenId?: string | null;
+    sourceTokenName?: string | null;
+    targetTokenName?: string | null;
+    sourceCenter?: CanvasPoint;
+    targetCenter?: CanvasPoint;
+    sourceBounds?: CanvasBounds;
+    targetBounds?: CanvasBounds;
+    startOffset?: number;
   };
 }
 
@@ -60,6 +76,29 @@ export type RitualFxPlacement =
       location: unknown;
       diagnostics?: RitualFxPlacementDiagnostics;
     };
+
+type TokenReference = {
+  tokenId: string | null;
+  actorId: string | null;
+  sceneId: string | null;
+  name: string | null;
+};
+
+type TokenGeometry = {
+  tokenId: string | null;
+  name: string | null;
+  center: CanvasPoint;
+  bounds: CanvasBounds;
+};
+
+type CanvasLike = {
+  scene?: { id?: unknown } | null;
+  grid?: { size?: unknown } | null;
+  tokens?: {
+    get?: (id: string) => unknown;
+    placeables?: unknown[];
+  } | null;
+};
 
 export function getAreaType(area: ToolkitAreaPayload | null): ToolkitAreaType | null {
   return area?.type ?? area?.areaType ?? null;
@@ -118,6 +157,10 @@ export function resolveRitualFxPlacement(
 ): RitualFxPlacement | null {
   if (preset.placementMode === "rectangleRayLine") {
     return resolveRectangleRayLinePlacement(context.area);
+  }
+
+  if (preset.placementMode === "sourceToTargetLine") {
+    return resolveSourceToTargetLinePlacement(context);
   }
 
   return resolveFirstTargetPlacement(context);
@@ -260,6 +303,51 @@ function resolveLineFromBounds(area: ToolkitAreaPayload): RitualFxPlacement | nu
   return createLinePlacement("bounds", area, { x: centerX, y }, { x: centerX, y: y + height });
 }
 
+function resolveSourceToTargetLinePlacement(context: NormalizedRitualFxContext): RitualFxPlacement | null {
+  const casterReference = normalizeTokenReference(readPath(context.sourcePayload, "caster.token"));
+  const targetReference = normalizeTokenReference(context.targets[0]);
+
+  if (!casterReference?.tokenId || !targetReference?.tokenId) return null;
+
+  const caster = resolveTokenGeometry(casterReference);
+  const target = resolveTokenGeometry(targetReference);
+
+  if (!caster || !target) return null;
+
+  const start = resolveEdgePointTowardTarget(caster, target.center);
+  const end = target.center;
+
+  if (pointsAreEqual(start, end)) return null;
+
+  const delta = calculateDelta(start, end);
+
+  return {
+    type: "line",
+    start,
+    end,
+    diagnostics: {
+      strategy: "sourceToTarget",
+      area: createRitualAreaDiagnostics(context.area),
+      resolved: {
+        start,
+        end,
+        delta,
+        distance: calculateDistance(delta),
+        angleDegrees: calculateAngleDegrees(delta),
+        sourceTokenId: caster.tokenId,
+        targetTokenId: target.tokenId,
+        sourceTokenName: caster.name,
+        targetTokenName: target.name,
+        sourceCenter: caster.center,
+        targetCenter: target.center,
+        sourceBounds: caster.bounds,
+        targetBounds: target.bounds,
+        startOffset: calculateDistance(calculateDelta(caster.center, start)),
+      },
+    },
+  };
+}
+
 function resolveFirstTargetPlacement(context: NormalizedRitualFxContext): RitualFxPlacement | null {
   const target = context.targets[0];
   if (!target) return null;
@@ -300,6 +388,109 @@ function createLinePlacement(
   };
 }
 
+function resolveTokenGeometry(reference: TokenReference): TokenGeometry | null {
+  const token = resolveCanvasToken(reference);
+  if (!token) return null;
+
+  const center = readPointFromPath(token, "center") ?? readPointFromPath(token, "document.center");
+  const bounds = readBoundsFromToken(token, center);
+  const resolvedCenter = center ?? (bounds ? getBoundsCenter(bounds) : null);
+
+  if (!resolvedCenter || !bounds) return null;
+
+  return {
+    tokenId: reference.tokenId,
+    name: reference.name ?? readStringPath(token, "name") ?? readStringPath(token, "document.name"),
+    center: resolvedCenter,
+    bounds,
+  };
+}
+
+function resolveCanvasToken(reference: TokenReference): unknown | null {
+  const canvas = getCanvas();
+  const tokenId = reference.tokenId;
+  if (!canvas || !tokenId) return null;
+
+  const currentSceneId = normalizeNullableString(canvas.scene?.id);
+  if (reference.sceneId && currentSceneId && reference.sceneId !== currentSceneId) return null;
+
+  const fromCollection = canvas.tokens?.get?.(tokenId);
+  if (fromCollection) return fromCollection;
+
+  return canvas.tokens?.placeables?.find((candidate) => {
+    return readStringPath(candidate, "id") === tokenId || readStringPath(candidate, "document.id") === tokenId;
+  }) ?? null;
+}
+
+function readBoundsFromToken(token: unknown, center: CanvasPoint | null): CanvasBounds | null {
+  const bounds = normalizeBounds(readPath(token, "bounds"));
+  if (bounds) return bounds;
+
+  const gridSize = getPositiveNumber(getCanvas()?.grid?.size) ?? 100;
+  const width = getPositiveNumber(readPath(token, "w"))
+    ?? getPositiveNumber(readPath(token, "width"))
+    ?? multiplyPositive(readPath(token, "document.width"), gridSize)
+    ?? gridSize;
+  const height = getPositiveNumber(readPath(token, "h"))
+    ?? getPositiveNumber(readPath(token, "height"))
+    ?? multiplyPositive(readPath(token, "document.height"), gridSize)
+    ?? gridSize;
+  const x = getFiniteNumber(readPath(token, "x")) ?? getFiniteNumber(readPath(token, "document.x"));
+  const y = getFiniteNumber(readPath(token, "y")) ?? getFiniteNumber(readPath(token, "document.y"));
+
+  if (x !== null && y !== null) {
+    return { x, y, width, height };
+  }
+
+  if (center) {
+    return {
+      x: center.x - width / 2,
+      y: center.y - height / 2,
+      width,
+      height,
+    };
+  }
+
+  return null;
+}
+
+function resolveEdgePointTowardTarget(source: TokenGeometry, targetCenter: CanvasPoint): CanvasPoint {
+  const delta = calculateDelta(source.center, targetCenter);
+  const distance = calculateDistance(delta);
+
+  if (distance <= 0) return source.center;
+
+  const unit = {
+    x: delta.x / distance,
+    y: delta.y / distance,
+  };
+  const halfWidth = Math.max(0, source.bounds.width / 2);
+  const halfHeight = Math.max(0, source.bounds.height / 2);
+  const xOffset = Math.abs(unit.x) > 0.0001 ? halfWidth / Math.abs(unit.x) : Number.POSITIVE_INFINITY;
+  const yOffset = Math.abs(unit.y) > 0.0001 ? halfHeight / Math.abs(unit.y) : Number.POSITIVE_INFINITY;
+  const offset = Math.min(xOffset, yOffset);
+  const safeOffset = Number.isFinite(offset) ? offset : Math.max(halfWidth, halfHeight, 0);
+
+  return {
+    x: source.center.x + unit.x * safeOffset,
+    y: source.center.y + unit.y * safeOffset,
+  };
+}
+
+function normalizeTokenReference(value: unknown): TokenReference | null {
+  if (!isRecord(value)) return null;
+
+  const tokenId = normalizeNullableString(value.tokenId) ?? normalizeNullableString(value.id);
+  if (!tokenId) return null;
+
+  return {
+    tokenId,
+    actorId: normalizeNullableString(value.actorId),
+    sceneId: normalizeNullableString(value.sceneId),
+    name: normalizeNullableString(value.name),
+  };
+}
+
 function normalizePoint(value: ToolkitPointPayload | null | undefined): CanvasPoint | null {
   const x = getFiniteNumber(value?.x);
   const y = getFiniteNumber(value?.y);
@@ -307,6 +498,34 @@ function normalizePoint(value: ToolkitPointPayload | null | undefined): CanvasPo
   if (x === null || y === null) return null;
 
   return { x, y };
+}
+
+function readPointFromPath(value: unknown, path: string): CanvasPoint | null {
+  const point = readPath(value, path);
+  const x = getFiniteNumber(readPath(point, "x"));
+  const y = getFiniteNumber(readPath(point, "y"));
+
+  if (x === null || y === null) return null;
+
+  return { x, y };
+}
+
+function normalizeBounds(value: unknown): CanvasBounds | null {
+  const x = getFiniteNumber(readPath(value, "x"));
+  const y = getFiniteNumber(readPath(value, "y"));
+  const width = getPositiveNumber(readPath(value, "width"));
+  const height = getPositiveNumber(readPath(value, "height"));
+
+  if (x === null || y === null || width === null || height === null) return null;
+
+  return { x, y, width, height };
+}
+
+function getBoundsCenter(bounds: CanvasBounds): CanvasPoint {
+  return {
+    x: bounds.x + bounds.width / 2,
+    y: bounds.y + bounds.height / 2,
+  };
 }
 
 function normalizeNullableString(value: unknown): string | null {
@@ -339,6 +558,11 @@ function getPositiveNumber(value: unknown): number | null {
   return numberValue !== null && numberValue > 0 ? numberValue : null;
 }
 
+function multiplyPositive(value: unknown, multiplier: number): number | null {
+  const numberValue = getPositiveNumber(value);
+  return numberValue !== null ? numberValue * multiplier : null;
+}
+
 function degreesToRadians(value: number): number {
   return (value * Math.PI) / 180;
 }
@@ -349,4 +573,29 @@ function radiansToDegrees(value: number): number {
 
 function pointsAreEqual(a: CanvasPoint, b: CanvasPoint): boolean {
   return a.x === b.x && a.y === b.y;
+}
+
+function readStringPath(value: unknown, path: string): string | null {
+  return normalizeNullableString(readPath(value, path));
+}
+
+function readPath(value: unknown, path: string): unknown {
+  if (!isRecord(value)) return undefined;
+
+  let current: unknown = value;
+  for (const segment of path.split(".")) {
+    if (!isRecord(current)) return undefined;
+    current = current[segment];
+  }
+
+  return current;
+}
+
+function getCanvas(): CanvasLike | null {
+  const value = (globalThis as { canvas?: unknown }).canvas;
+  return isRecord(value) ? (value as CanvasLike) : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object");
 }

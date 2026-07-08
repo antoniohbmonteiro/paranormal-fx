@@ -1,7 +1,7 @@
 {
   "id": "paranormal-fx",
   "title": "Paranormal FX",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Efeitos visuais e sonoros para rituais e automações do Paranormal Toolkit, com integração ao Sequencer e bibliotecas JB2A instaladas pelo usuário.",
   "authors": [
     {

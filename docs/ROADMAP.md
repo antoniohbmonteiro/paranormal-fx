@@ -1,5 +1,12 @@
 # Roadmap
 
+## 0.2.0
+
+- Adicionar preset visual para Eletrocussão Padrão (`form: standard`).
+- Posicionar o efeito do conjurador até o alvo único usando `sourceToTargetLine`.
+- Calcular a origem na borda do token do conjurador voltada para o alvo, sem depender de facing/rotação do token.
+- Manter Eletrocussão Discente em `rectangleRayLine` sem alteração de regra.
+
 ## 0.1.4
 
 - Configurar o manifesto para publicação via GitHub Releases.
@@ -36,6 +43,7 @@
 
 ## Próximos passos
 
+- Adicionar Eletrocussão Verdadeira com múltiplos alvos e delay entre disparos.
 - Melhorar cálculo de variantes JB2A por tamanho real da área.
 - Adicionar settings para ativar/desativar presets.
 - Adicionar suporte a som por preset.

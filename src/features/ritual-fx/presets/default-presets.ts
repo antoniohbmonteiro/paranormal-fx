@@ -1,6 +1,12 @@
 import type { RitualFxPreset } from "../ritual-fx-preset";
-import { createEletrocussaoStudentRectangleRayPreset } from "./eletrocussao";
+import {
+  createEletrocussaoStandardSingleTargetPreset,
+  createEletrocussaoStudentRectangleRayPreset,
+} from "./eletrocussao";
 
 export function getDefaultRitualFxPresets(): RitualFxPreset[] {
-  return [createEletrocussaoStudentRectangleRayPreset()];
+  return [
+    createEletrocussaoStandardSingleTargetPreset(),
+    createEletrocussaoStudentRectangleRayPreset(),
+  ];
 }
