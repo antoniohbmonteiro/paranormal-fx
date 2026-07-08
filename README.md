@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.1.2
+0.1.3
 ```
 
 ## Objetivo
@@ -130,3 +130,8 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 ### 0.1.2
 
 - Corrige o posicionamento da linha de FX ao rotacionar `rectangleRay`, usando o início real da forma retangular e sua direção para calcular o fim da área.
+
+### 0.1.3
+
+- Adiciona logs diagnósticos detalhados para investigar o posicionamento da `rectangleRay` rotacionada.
+- Os logs mostram payload bruto do Toolkit, resumo da área, direção recebida, start/end calculados, delta, distância e ângulo final enviado ao Sequencer.

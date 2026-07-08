@@ -11,19 +11,105 @@ export interface CanvasPoint {
   y: number;
 }
 
+export interface RitualFxPlacementDiagnostics {
+  strategy: "explicitRay" | "rectangleShape" | "centerAndShape" | "bounds" | "firstTarget";
+  area: RitualAreaDiagnostics | null;
+  resolved?: {
+    start?: CanvasPoint;
+    end?: CanvasPoint;
+    delta?: CanvasPoint;
+    distance?: number;
+    angleDegrees?: number;
+    length?: number;
+    width?: number;
+    directionDegrees?: number;
+    directionRadians?: number;
+    lengthVector?: CanvasPoint;
+    perpendicularVector?: CanvasPoint;
+  };
+}
+
+export interface RitualAreaDiagnostics {
+  type: ToolkitAreaType | null;
+  sceneId: string | null;
+  regionId: string | null;
+  gridSize: number | null;
+  bounds: unknown;
+  shape: unknown;
+  center: unknown;
+  ray: unknown;
+  areaRotation: unknown;
+  areaLength: unknown;
+  areaWidth: unknown;
+  shapeDirection: unknown;
+  shapeWidth: unknown;
+  shapeHeight: unknown;
+  shapeX: unknown;
+  shapeY: unknown;
+}
+
 export type RitualFxPlacement =
   | {
       type: "line";
       start: CanvasPoint;
       end: CanvasPoint;
+      diagnostics?: RitualFxPlacementDiagnostics;
     }
   | {
       type: "point";
       location: unknown;
+      diagnostics?: RitualFxPlacementDiagnostics;
     };
 
 export function getAreaType(area: ToolkitAreaPayload | null): ToolkitAreaType | null {
   return area?.type ?? area?.areaType ?? null;
+}
+
+export function createRitualAreaDiagnostics(area: ToolkitAreaPayload | null): RitualAreaDiagnostics | null {
+  if (!area) return null;
+
+  return {
+    type: getAreaType(area),
+    sceneId: normalizeNullableString(area.sceneId),
+    regionId: normalizeNullableString(area.regionId),
+    gridSize: getFiniteNumber(area.gridSize),
+    bounds: area.bounds ?? null,
+    shape: area.shape ?? null,
+    center: area.center ?? null,
+    ray: area.ray ?? null,
+    areaRotation: area.rotation ?? null,
+    areaLength: area.length ?? null,
+    areaWidth: area.width ?? null,
+    shapeDirection: area.shape?.direction ?? null,
+    shapeWidth: area.shape?.width ?? null,
+    shapeHeight: area.shape?.height ?? null,
+    shapeX: area.shape?.x ?? null,
+    shapeY: area.shape?.y ?? null,
+  };
+}
+
+export function createPlacementSummary(placement: RitualFxPlacement | null): unknown {
+  if (!placement) return null;
+
+  if (placement.type === "point") {
+    return {
+      type: placement.type,
+      location: placement.location,
+      diagnostics: placement.diagnostics ?? null,
+    };
+  }
+
+  const delta = calculateDelta(placement.start, placement.end);
+
+  return {
+    type: placement.type,
+    start: placement.start,
+    end: placement.end,
+    delta,
+    distance: calculateDistance(delta),
+    angleDegrees: calculateAngleDegrees(delta),
+    diagnostics: placement.diagnostics ?? null,
+  };
 }
 
 export function resolveRitualFxPlacement(
@@ -59,7 +145,7 @@ function resolveExplicitRay(area: ToolkitAreaPayload): RitualFxPlacement | null 
   if (!start || !end) return null;
   if (pointsAreEqual(start, end)) return null;
 
-  return { type: "line", start, end };
+  return createLinePlacement("explicitRay", area, start, end);
 }
 
 function resolveLineFromRectangleShape(area: ToolkitAreaPayload): RitualFxPlacement | null {
@@ -88,13 +174,29 @@ function resolveLineFromRectangleShape(area: ToolkitAreaPayload): RitualFxPlacem
     x: x + perpendicularVector.x * halfWidth,
     y: y + perpendicularVector.y * halfWidth,
   };
+  const end = {
+    x: start.x + lengthVector.x * length,
+    y: start.y + lengthVector.y * length,
+  };
 
   return {
-    type: "line",
-    start,
-    end: {
-      x: start.x + lengthVector.x * length,
-      y: start.y + lengthVector.y * length,
+    ...createLinePlacement("rectangleShape", area, start, end),
+    diagnostics: {
+      strategy: "rectangleShape",
+      area: createRitualAreaDiagnostics(area),
+      resolved: {
+        start,
+        end,
+        delta: calculateDelta(start, end),
+        distance: calculateDistance(calculateDelta(start, end)),
+        angleDegrees: calculateAngleDegrees(calculateDelta(start, end)),
+        length,
+        width,
+        directionDegrees: direction,
+        directionRadians: radians,
+        lengthVector,
+        perpendicularVector,
+      },
     },
   };
 }
@@ -110,16 +212,30 @@ function resolveLineFromCenterAndShape(area: ToolkitAreaPayload): RitualFxPlacem
   const halfLength = length / 2;
   const dx = Math.cos(radians) * halfLength;
   const dy = Math.sin(radians) * halfLength;
+  const start = {
+    x: center.x - dx,
+    y: center.y - dy,
+  };
+  const end = {
+    x: center.x + dx,
+    y: center.y + dy,
+  };
 
   return {
-    type: "line",
-    start: {
-      x: center.x - dx,
-      y: center.y - dy,
-    },
-    end: {
-      x: center.x + dx,
-      y: center.y + dy,
+    ...createLinePlacement("centerAndShape", area, start, end),
+    diagnostics: {
+      strategy: "centerAndShape",
+      area: createRitualAreaDiagnostics(area),
+      resolved: {
+        start,
+        end,
+        delta: calculateDelta(start, end),
+        distance: calculateDistance(calculateDelta(start, end)),
+        angleDegrees: calculateAngleDegrees(calculateDelta(start, end)),
+        length,
+        directionDegrees: direction,
+        directionRadians: radians,
+      },
     },
   };
 }
@@ -137,19 +253,11 @@ function resolveLineFromBounds(area: ToolkitAreaPayload): RitualFxPlacement | nu
 
   if (width >= height) {
     const centerY = y + height / 2;
-    return {
-      type: "line",
-      start: { x, y: centerY },
-      end: { x: x + width, y: centerY },
-    };
+    return createLinePlacement("bounds", area, { x, y: centerY }, { x: x + width, y: centerY });
   }
 
   const centerX = x + width / 2;
-  return {
-    type: "line",
-    start: { x: centerX, y },
-    end: { x: centerX, y: y + height },
-  };
+  return createLinePlacement("bounds", area, { x: centerX, y }, { x: centerX, y: y + height });
 }
 
 function resolveFirstTargetPlacement(context: NormalizedRitualFxContext): RitualFxPlacement | null {
@@ -159,6 +267,36 @@ function resolveFirstTargetPlacement(context: NormalizedRitualFxContext): Ritual
   return {
     type: "point",
     location: target,
+    diagnostics: {
+      strategy: "firstTarget",
+      area: createRitualAreaDiagnostics(context.area),
+    },
+  };
+}
+
+function createLinePlacement(
+  strategy: RitualFxPlacementDiagnostics["strategy"],
+  area: ToolkitAreaPayload,
+  start: CanvasPoint,
+  end: CanvasPoint,
+): RitualFxPlacement {
+  const delta = calculateDelta(start, end);
+
+  return {
+    type: "line",
+    start,
+    end,
+    diagnostics: {
+      strategy,
+      area: createRitualAreaDiagnostics(area),
+      resolved: {
+        start,
+        end,
+        delta,
+        distance: calculateDistance(delta),
+        angleDegrees: calculateAngleDegrees(delta),
+      },
+    },
   };
 }
 
@@ -169,6 +307,27 @@ function normalizePoint(value: ToolkitPointPayload | null | undefined): CanvasPo
   if (x === null || y === null) return null;
 
   return { x, y };
+}
+
+function normalizeNullableString(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
+}
+
+function calculateDelta(start: CanvasPoint, end: CanvasPoint): CanvasPoint {
+  return {
+    x: end.x - start.x,
+    y: end.y - start.y,
+  };
+}
+
+function calculateDistance(delta: CanvasPoint): number {
+  return Math.hypot(delta.x, delta.y);
+}
+
+function calculateAngleDegrees(delta: CanvasPoint): number {
+  return radiansToDegrees(Math.atan2(delta.y, delta.x));
 }
 
 function getFiniteNumber(value: unknown): number | null {
@@ -182,6 +341,10 @@ function getPositiveNumber(value: unknown): number | null {
 
 function degreesToRadians(value: number): number {
   return (value * Math.PI) / 180;
+}
+
+function radiansToDegrees(value: number): number {
+  return (value * 180) / Math.PI;
 }
 
 function pointsAreEqual(a: CanvasPoint, b: CanvasPoint): boolean {

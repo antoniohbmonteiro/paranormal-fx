@@ -1,5 +1,11 @@
 # Roadmap
 
+## 0.1.3
+
+- Adicionar logs diagnósticos para confirmar se o Toolkit está enviando `shape.direction`, `ray.start/end`, `bounds`, `center` e `shape` corretamente.
+- Logar o `placement` final enviado ao Sequencer, incluindo start/end, delta, distância e ângulo.
+- Não altera regra nem comportamento do Toolkit.
+
 ## 0.1.2
 
 - Corrigir posicionamento da Eletrocussão Discente ao rotacionar a `rectangleRay`.

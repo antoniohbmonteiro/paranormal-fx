@@ -1,7 +1,7 @@
 import { MODULE_ID } from "../../config/module-constants";
 import { logger } from "../../core/logger";
 import type { RitualFxPreset } from "../../features/ritual-fx/ritual-fx-preset";
-import type { RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
+import { createPlacementSummary, type RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
 
 type SequenceConstructor = new (options?: Record<string, unknown>) => SequenceLike;
 
@@ -38,6 +38,12 @@ export class SequencerAdapter {
       return;
     }
 
+    logger.debug("Preparing Sequencer ritual FX", {
+      preset: preset.id,
+      effectPath: preset.effectPath,
+      placement: createPlacementSummary(placement),
+    });
+
     const sequence = new Sequence({ moduleName: MODULE_ID });
     const effect = sequence.effect().name(preset.id).file(preset.effectPath);
 
@@ -46,15 +52,21 @@ export class SequencerAdapter {
     if (preset.scale) effect.scale(preset.scale);
 
     await sequence.play();
-    logger.debug("Played ritual FX preset", { preset: preset.id, placement });
+    logger.debug("Played ritual FX preset", {
+      preset: preset.id,
+      effectPath: preset.effectPath,
+      placement: createPlacementSummary(placement),
+    });
   }
 }
 
 function applyPlacement(effect: SequenceEffectLike, placement: RitualFxPlacement): void {
   if (placement.type === "line") {
+    logger.debug("Applying Sequencer line placement", createPlacementSummary(placement));
     effect.atLocation(placement.start).stretchTo(placement.end);
     return;
   }
 
+  logger.debug("Applying Sequencer point placement", createPlacementSummary(placement));
   effect.atLocation(placement.location);
 }

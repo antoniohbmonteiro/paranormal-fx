@@ -1,12 +1,12 @@
-const p = "paranormal-fx", d = "Paranormal FX", x = "ordemparanormal", E = [
+const F = "paranormal-fx", I = "Paranormal FX", w = "ordemparanormal", _ = [
   "paranormal-toolkit",
   "sequencer",
   "JB2A_DnD5e"
-], F = {
+], M = {
   debug: "debug"
 };
-function S() {
-  game.settings.register(p, F.debug, {
+function X() {
+  game.settings.register(F, M.debug, {
     name: "Debug",
     hint: "Exibe logs detalhados do Paranormal FX no console.",
     scope: "client",
@@ -15,200 +15,310 @@ function S() {
     default: !1
   });
 }
-function A() {
+function C() {
   try {
-    return !!game.settings.get(p, F.debug);
+    return !!game.settings.get(F, M.debug);
   } catch {
     return !1;
   }
 }
-function c(t) {
-  return `${d} | ${t}`;
+function b(e) {
+  return `${I} | ${e}`;
 }
 const s = {
-  debug(t, ...e) {
-    A() && console.debug(c(t), ...e);
+  debug(e, ...t) {
+    C() && console.debug(b(e), ...t);
   },
-  info(t, ...e) {
-    console.info(c(t), ...e);
+  info(e, ...t) {
+    console.info(b(e), ...t);
   },
-  warn(t, ...e) {
-    console.warn(c(t), ...e);
+  warn(e, ...t) {
+    console.warn(b(e), ...t);
   },
-  error(t, ...e) {
-    console.error(c(t), ...e);
+  error(e, ...t) {
+    console.error(b(e), ...t);
   }
-}, M = {
+}, O = {
   "paranormal-toolkit": "Paranormal Toolkit",
   sequencer: "Sequencer",
   JB2A_DnD5e: "JB2A"
 };
-function w() {
-  const t = E.filter((e) => !game.modules.get(e)?.active);
-  if (t.length > 0) {
-    const e = t.map((n) => M[n] ?? n).join(", ");
-    return ui.notifications.error(`${d} requer os módulos ativos: ${e}.`), s.error("Missing required modules", t), !1;
+function N() {
+  const e = _.filter((t) => !game.modules.get(t)?.active);
+  if (e.length > 0) {
+    const t = e.map((n) => O[n] ?? n).join(", ");
+    return ui.notifications.error(`${I} requer os módulos ativos: ${t}.`), s.error("Missing required modules", e), !1;
   }
-  return game.system.id !== x && (ui.notifications.warn(`${d} foi feito para o sistema Ordem Paranormal.`), s.warn("Unexpected system", { current: game.system.id, expected: x })), !0;
+  return game.system.id !== w && (ui.notifications.warn(`${I} foi feito para o sistema Ordem Paranormal.`), s.warn("Unexpected system", { current: game.system.id, expected: w })), !0;
 }
-const m = {
+const T = {
   ritualCastStarted: "paranormal-toolkit.ritual.cast.started",
   ritualAreaResolved: "paranormal-toolkit.ritual.area.resolved",
   ritualCastFinished: "paranormal-toolkit.ritual.cast.finished"
 };
-function L(t, e = null) {
-  const n = t.area ?? t.event?.area ?? e, r = n?.type ?? n?.areaType ?? null, i = t.targets ?? t.event?.targets ?? n?.targets ?? [];
+function H(e, t = null) {
+  const n = e.area ?? e.event?.area ?? t, r = n?.type ?? n?.areaType ?? null, i = e.targets ?? e.event?.targets ?? n?.targets ?? [];
   return {
-    castId: t.castId ?? null,
-    toolkitPresetId: t.automation?.presetId ?? null,
-    form: t.ritual?.form ?? null,
+    castId: e.castId ?? null,
+    toolkitPresetId: e.automation?.presetId ?? null,
+    form: e.ritual?.form ?? null,
     areaType: r,
     area: n ?? null,
     targets: Array.isArray(i) ? i : [],
-    fxEligible: t.automation?.fxEligible === !0,
-    sourcePayload: t
+    fxEligible: e.automation?.fxEligible === !0,
+    sourcePayload: e
   };
 }
-function v() {
-  const t = globalThis.Sequence;
-  return typeof t == "function" ? t : null;
+function L(e) {
+  return e?.type ?? e?.areaType ?? null;
 }
-class D {
-  async playRitualPreset(e, n) {
-    const r = v();
+function u(e) {
+  return e ? {
+    type: L(e),
+    sceneId: v(e.sceneId),
+    regionId: v(e.regionId),
+    gridSize: o(e.gridSize),
+    bounds: e.bounds ?? null,
+    shape: e.shape ?? null,
+    center: e.center ?? null,
+    ray: e.ray ?? null,
+    areaRotation: e.rotation ?? null,
+    areaLength: e.length ?? null,
+    areaWidth: e.width ?? null,
+    shapeDirection: e.shape?.direction ?? null,
+    shapeWidth: e.shape?.width ?? null,
+    shapeHeight: e.shape?.height ?? null,
+    shapeX: e.shape?.x ?? null,
+    shapeY: e.shape?.y ?? null
+  } : null;
+}
+function m(e) {
+  if (!e) return null;
+  if (e.type === "point")
+    return {
+      type: e.type,
+      location: e.location,
+      diagnostics: e.diagnostics ?? null
+    };
+  const t = f(e.start, e.end);
+  return {
+    type: e.type,
+    start: e.start,
+    end: e.end,
+    delta: t,
+    distance: x(t),
+    angleDegrees: A(t),
+    diagnostics: e.diagnostics ?? null
+  };
+}
+function z(e, t) {
+  return e.placementMode === "rectangleRayLine" ? B(t.area) : G(t);
+}
+function B(e) {
+  if (!e || L(e) !== "rectangleRay") return null;
+  const t = U(e);
+  if (t) return t;
+  const n = $(e);
+  if (n) return n;
+  const r = V(e);
+  return r || Y(e);
+}
+function U(e) {
+  const t = E(e.ray?.start), n = E(e.ray?.end);
+  return !t || !n || W(t, n) ? null : p("explicitRay", e, t, n);
+}
+function $(e) {
+  const t = e.shape;
+  if (!t) return null;
+  const n = o(t.x), r = o(t.y), i = R(t.width ?? e.length), a = o(t.height ?? e.width) ?? 0, g = o(t.direction ?? e.rotation) ?? 0;
+  if (n === null || r === null || i === null) return null;
+  const l = k(g), c = {
+    x: Math.cos(l),
+    y: Math.sin(l)
+  }, d = {
+    x: -Math.sin(l),
+    y: Math.cos(l)
+  }, D = a / 2, h = {
+    x: n + d.x * D,
+    y: r + d.y * D
+  }, y = {
+    x: h.x + c.x * i,
+    y: h.y + c.y * i
+  };
+  return {
+    ...p("rectangleShape", e, h, y),
+    diagnostics: {
+      strategy: "rectangleShape",
+      area: u(e),
+      resolved: {
+        start: h,
+        end: y,
+        delta: f(h, y),
+        distance: x(f(h, y)),
+        angleDegrees: A(f(h, y)),
+        length: i,
+        width: a,
+        directionDegrees: g,
+        directionRadians: l,
+        lengthVector: c,
+        perpendicularVector: d
+      }
+    }
+  };
+}
+function V(e) {
+  const t = E(e.center), n = R(e.shape?.width ?? e.length), r = o(e.shape?.direction ?? e.rotation) ?? 0;
+  if (!t || n === null) return null;
+  const i = k(r), a = n / 2, g = Math.cos(i) * a, l = Math.sin(i) * a, c = {
+    x: t.x - g,
+    y: t.y - l
+  }, d = {
+    x: t.x + g,
+    y: t.y + l
+  };
+  return {
+    ...p("centerAndShape", e, c, d),
+    diagnostics: {
+      strategy: "centerAndShape",
+      area: u(e),
+      resolved: {
+        start: c,
+        end: d,
+        delta: f(c, d),
+        distance: x(f(c, d)),
+        angleDegrees: A(f(c, d)),
+        length: n,
+        directionDegrees: r,
+        directionRadians: i
+      }
+    }
+  };
+}
+function Y(e) {
+  const t = e.bounds;
+  if (!t) return null;
+  const n = o(t.x), r = o(t.y), i = R(t.width), a = R(t.height);
+  if (n === null || r === null || i === null || a === null) return null;
+  if (i >= a) {
+    const l = r + a / 2;
+    return p("bounds", e, { x: n, y: l }, { x: n + i, y: l });
+  }
+  const g = n + i / 2;
+  return p("bounds", e, { x: g, y: r }, { x: g, y: r + a });
+}
+function G(e) {
+  const t = e.targets[0];
+  return t ? {
+    type: "point",
+    location: t,
+    diagnostics: {
+      strategy: "firstTarget",
+      area: u(e.area)
+    }
+  } : null;
+}
+function p(e, t, n, r) {
+  const i = f(n, r);
+  return {
+    type: "line",
+    start: n,
+    end: r,
+    diagnostics: {
+      strategy: e,
+      area: u(t),
+      resolved: {
+        start: n,
+        end: r,
+        delta: i,
+        distance: x(i),
+        angleDegrees: A(i)
+      }
+    }
+  };
+}
+function E(e) {
+  const t = o(e?.x), n = o(e?.y);
+  return t === null || n === null ? null : { x: t, y: n };
+}
+function v(e) {
+  if (typeof e != "string") return null;
+  const t = e.trim();
+  return t.length > 0 ? t : null;
+}
+function f(e, t) {
+  return {
+    x: t.x - e.x,
+    y: t.y - e.y
+  };
+}
+function x(e) {
+  return Math.hypot(e.x, e.y);
+}
+function A(e) {
+  return J(Math.atan2(e.y, e.x));
+}
+function o(e) {
+  return typeof e == "number" && Number.isFinite(e) ? e : null;
+}
+function R(e) {
+  const t = o(e);
+  return t !== null && t > 0 ? t : null;
+}
+function k(e) {
+  return e * Math.PI / 180;
+}
+function J(e) {
+  return e * 180 / Math.PI;
+}
+function W(e, t) {
+  return e.x === t.x && e.y === t.y;
+}
+function j() {
+  const e = globalThis.Sequence;
+  return typeof e == "function" ? e : null;
+}
+class K {
+  async playRitualPreset(t, n) {
+    const r = j();
     if (!r) {
       s.warn("Sequencer API is not available at runtime.");
       return;
     }
-    if (!e.effectPath) {
-      s.warn("Ritual FX preset has no effect path configured yet.", e.id);
+    if (!t.effectPath) {
+      s.warn("Ritual FX preset has no effect path configured yet.", t.id);
       return;
     }
-    const i = new r({ moduleName: p }), a = i.effect().name(e.id).file(e.effectPath);
-    k(a, n), e.scale && a.scale(e.scale), await i.play(), s.debug("Played ritual FX preset", { preset: e.id, placement: n });
+    s.debug("Preparing Sequencer ritual FX", {
+      preset: t.id,
+      effectPath: t.effectPath,
+      placement: m(n)
+    });
+    const i = new r({ moduleName: F }), a = i.effect().name(t.id).file(t.effectPath);
+    Q(a, n), t.scale && a.scale(t.scale), await i.play(), s.debug("Played ritual FX preset", {
+      preset: t.id,
+      effectPath: t.effectPath,
+      placement: m(n)
+    });
   }
 }
-function k(t, e) {
-  if (e.type === "line") {
-    t.atLocation(e.start).stretchTo(e.end);
+function Q(e, t) {
+  if (t.type === "line") {
+    s.debug("Applying Sequencer line placement", m(t)), e.atLocation(t.start).stretchTo(t.end);
     return;
   }
-  t.atLocation(e.location);
+  s.debug("Applying Sequencer point placement", m(t)), e.atLocation(t.location);
 }
-function q(t) {
-  return t?.type ?? t?.areaType ?? null;
-}
-function _(t, e) {
-  return t.placementMode === "rectangleRayLine" ? O(e.area) : U(e);
-}
-function O(t) {
-  if (!t || q(t) !== "rectangleRay") return null;
-  const e = X(t);
-  if (e) return e;
-  const n = C(t);
-  if (n) return n;
-  const r = N(t);
-  return r || B(t);
-}
-function X(t) {
-  const e = y(t.ray?.start), n = y(t.ray?.end);
-  return !e || !n || H(e, n) ? null : { type: "line", start: e, end: n };
-}
-function C(t) {
-  const e = t.shape;
-  if (!e) return null;
-  const n = l(e.x), r = l(e.y), i = g(e.width ?? t.length), a = l(e.height ?? t.width) ?? 0, u = l(e.direction ?? t.rotation) ?? 0;
-  if (n === null || r === null || i === null) return null;
-  const o = I(u), R = {
-    x: Math.cos(o),
-    y: Math.sin(o)
-  }, b = {
-    x: -Math.sin(o),
-    y: Math.cos(o)
-  }, P = a / 2, h = {
-    x: n + b.x * P,
-    y: r + b.y * P
-  };
-  return {
-    type: "line",
-    start: h,
-    end: {
-      x: h.x + R.x * i,
-      y: h.y + R.y * i
-    }
-  };
-}
-function N(t) {
-  const e = y(t.center), n = g(t.shape?.width ?? t.length), r = l(t.shape?.direction ?? t.rotation) ?? 0;
-  if (!e || n === null) return null;
-  const i = I(r), a = n / 2, u = Math.cos(i) * a, o = Math.sin(i) * a;
-  return {
-    type: "line",
-    start: {
-      x: e.x - u,
-      y: e.y - o
-    },
-    end: {
-      x: e.x + u,
-      y: e.y + o
-    }
-  };
-}
-function B(t) {
-  const e = t.bounds;
-  if (!e) return null;
-  const n = l(e.x), r = l(e.y), i = g(e.width), a = g(e.height);
-  if (n === null || r === null || i === null || a === null) return null;
-  if (i >= a) {
-    const o = r + a / 2;
-    return {
-      type: "line",
-      start: { x: n, y: o },
-      end: { x: n + i, y: o }
-    };
-  }
-  const u = n + i / 2;
-  return {
-    type: "line",
-    start: { x: u, y: r },
-    end: { x: u, y: r + a }
-  };
-}
-function U(t) {
-  const e = t.targets[0];
-  return e ? {
-    type: "point",
-    location: e
-  } : null;
-}
-function y(t) {
-  const e = l(t?.x), n = l(t?.y);
-  return e === null || n === null ? null : { x: e, y: n };
-}
-function l(t) {
-  return typeof t == "number" && Number.isFinite(t) ? t : null;
-}
-function g(t) {
-  const e = l(t);
-  return e !== null && e > 0 ? e : null;
-}
-function I(t) {
-  return t * Math.PI / 180;
-}
-function H(t, e) {
-  return t.x === e.x && t.y === e.y;
-}
-class $ {
+class Z {
   #e = /* @__PURE__ */ new Map();
-  register(e) {
-    this.#e.set(e.id, e);
+  register(t) {
+    this.#e.set(t.id, t);
   }
-  registerMany(e) {
-    for (const n of e) this.register(n);
+  registerMany(t) {
+    for (const n of t) this.register(n);
   }
-  findMatchingPreset(e) {
+  findMatchingPreset(t) {
     for (const n of this.#e.values())
-      if (z(n, e))
+      if (ee(n, t))
         return n;
     return null;
   }
@@ -216,53 +326,105 @@ class $ {
     return [...this.#e.values()];
   }
 }
-function z(t, e) {
-  return !(t.match.toolkitPresetId !== e.toolkitPresetId || t.match.form && t.match.form !== e.form || t.match.areaType && t.match.areaType !== e.areaType);
+function ee(e, t) {
+  return !(e.match.toolkitPresetId !== t.toolkitPresetId || e.match.form && e.match.form !== t.form || e.match.areaType && e.match.areaType !== t.areaType);
 }
-const T = new $();
-class G {
-  constructor(e = new D()) {
-    this.sequencerAdapter = e;
+const q = new Z();
+class te {
+  constructor(t = new K()) {
+    this.sequencerAdapter = t;
   }
   sequencerAdapter;
-  async handleRitualFinished(e) {
-    if (!e.fxEligible) {
-      s.debug("Ignoring ritual because payload is not FX eligible", e);
+  async handleRitualFinished(t) {
+    if (s.debug("Handling ritual FX context", {
+      castId: t.castId,
+      toolkitPresetId: t.toolkitPresetId,
+      form: t.form,
+      areaType: t.areaType,
+      fxEligible: t.fxEligible,
+      targetCount: t.targets.length,
+      area: u(t.area)
+    }), !t.fxEligible) {
+      s.debug("Ignoring ritual because payload is not FX eligible", t);
       return;
     }
-    if (!e.toolkitPresetId) {
-      s.debug("Ignoring ritual without toolkit preset id", e);
+    if (!t.toolkitPresetId) {
+      s.debug("Ignoring ritual without toolkit preset id", t);
       return;
     }
-    const n = T.findMatchingPreset(e);
+    const n = q.findMatchingPreset(t);
     if (!n) {
-      s.debug("No Ritual FX preset matched this ritual context", e);
+      s.debug("No Ritual FX preset matched this ritual context", t);
       return;
     }
-    const r = _(n, e);
+    s.debug("Matched Ritual FX preset", {
+      preset: n,
+      area: u(t.area)
+    });
+    const r = z(n, t);
     if (!r) {
-      s.debug("No Ritual FX placement could be resolved", { preset: n, context: e });
+      s.debug("No Ritual FX placement could be resolved", {
+        preset: n,
+        area: u(t.area),
+        context: t
+      });
       return;
     }
-    s.debug("Resolved ritual FX placement", { preset: n.id, placement: r, context: e }), await this.sequencerAdapter.playRitualPreset(n, r);
+    s.debug("Resolved ritual FX placement", {
+      preset: n.id,
+      placement: m(r),
+      rawPlacement: r
+    }), await this.sequencerAdapter.playRitualPreset(n, r);
   }
 }
-const f = /* @__PURE__ */ new Map();
-function J(t = new G()) {
-  Hooks.on(m.ritualCastStarted, (e) => {
-    e.castId && f.delete(e.castId), s.debug("Ritual cast started", e);
-  }), Hooks.on(m.ritualAreaResolved, (e) => {
-    const n = e.area ?? e.event?.area;
-    e.castId && n && f.set(e.castId, n), s.debug("Ritual area resolved", e);
-  }), Hooks.on(m.ritualCastFinished, (e) => {
-    const n = e.castId ? f.get(e.castId) ?? null : null, r = L(e, n);
-    t.handleRitualFinished(r).catch((i) => {
+const P = /* @__PURE__ */ new Map();
+function ne(e = new te()) {
+  Hooks.on(T.ritualCastStarted, (t) => {
+    t.castId && P.delete(t.castId), s.debug("Ritual cast started", S(t));
+  }), Hooks.on(T.ritualAreaResolved, (t) => {
+    const n = t.area ?? t.event?.area;
+    t.castId && n && P.set(t.castId, n), s.debug("Ritual area resolved", {
+      lifecycle: S(t),
+      area: u(n ?? null),
+      rawArea: n ?? null,
+      rawPayload: t
+    });
+  }), Hooks.on(T.ritualCastFinished, (t) => {
+    const n = t.castId ? P.get(t.castId) ?? null : null, r = H(t, n);
+    s.debug("Ritual cast finished", {
+      lifecycle: S(t),
+      cachedArea: u(n),
+      normalizedArea: u(r.area),
+      normalizedContext: {
+        castId: r.castId,
+        toolkitPresetId: r.toolkitPresetId,
+        form: r.form,
+        areaType: r.areaType,
+        targetCount: r.targets.length,
+        fxEligible: r.fxEligible
+      },
+      rawPayload: t
+    }), e.handleRitualFinished(r).catch((i) => {
       s.error("Failed to play ritual FX", i, r);
-    }), e.castId && f.delete(e.castId);
+    }), t.castId && P.delete(t.castId);
   }), s.info("Ritual FX listeners registered.");
 }
-const V = "jb2a.chain_lightning.primary.blue.60ft";
-function Y(t = V) {
+function S(e) {
+  return {
+    version: e.version ?? null,
+    type: e.type ?? null,
+    castId: e.castId ?? null,
+    sceneId: e.sceneId ?? null,
+    automationType: e.automation?.type ?? null,
+    presetId: e.automation?.presetId ?? null,
+    presetVersion: e.automation?.presetVersion ?? null,
+    fxEligible: e.automation?.fxEligible ?? null,
+    ritualForm: e.ritual?.form ?? null,
+    targetCount: Array.isArray(e.targets) ? e.targets.length : Array.isArray(e.event?.targets) ? e.event.targets.length : null
+  };
+}
+const re = "jb2a.chain_lightning.primary.blue.60ft";
+function ie(e = re) {
   return {
     id: "ritual.eletrocussao.student.rectangleRay",
     label: "Eletrocussão Discente - Linha",
@@ -271,17 +433,17 @@ function Y(t = V) {
       form: "student",
       areaType: "rectangleRay"
     },
-    effectPath: t,
+    effectPath: e,
     placementMode: "rectangleRayLine"
   };
 }
-function j() {
-  return [Y()];
+function se() {
+  return [ie()];
 }
 Hooks.once("init", () => {
-  S(), T.registerMany(j()), s.info("Initialized.");
+  X(), q.registerMany(se()), s.info("Initialized.");
 });
 Hooks.once("ready", () => {
-  w() && (J(), s.info(`${d} ready.`));
+  N() && (ne(), s.info(`${I} ready.`));
 });
 //# sourceMappingURL=main.js.map
