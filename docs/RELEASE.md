@@ -22,8 +22,8 @@ npm run build
 4. Create and push a matching tag:
 
 ```powershell
-git tag v0.2.1
-git push origin v0.2.1
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 The GitHub Actions workflow will:

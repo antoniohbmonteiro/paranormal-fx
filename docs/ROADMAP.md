@@ -1,5 +1,12 @@
 # Roadmap
 
+## 0.3.0
+
+- Exibir texto flutuante nativo de dano e cura pela variação final de PV/HP.
+- Hidratar snapshots no carregamento da cena e separar Actors vinculados de sintéticos.
+- Restringir o feedback de jogadores a OBSERVER+, Tokens não ocultos e visualmente disponíveis.
+- Adicionar setting de cliente e cobertura unitária da lógica pura.
+
 ## 0.2.1
 
 - Adicionar preset visual para Eletrocussão Verdadeira (`form: true`).

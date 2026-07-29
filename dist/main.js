@@ -1,62 +1,77 @@
-const D = "paranormal-fx", k = "Paranormal FX", C = "ordemparanormal", U = [
+const S = "paranormal-fx", A = "Paranormal FX", B = "ordemparanormal", Z = [
   "paranormal-toolkit",
   "sequencer",
   "JB2A_DnD5e"
-], q = {
-  debug: "debug"
+], w = {
+  debug: "debug",
+  resourceFeedback: "resourceFeedback"
 };
-function V() {
-  game.settings.register(D, q.debug, {
+function ee() {
+  game.settings.register(S, w.debug, {
     name: "Debug",
     hint: "Exibe logs detalhados do Paranormal FX no console.",
     scope: "client",
     config: !0,
     type: Boolean,
     default: !1
+  }), game.settings.register(S, w.resourceFeedback, {
+    name: "Texto flutuante de dano e cura",
+    hint: "Exibe números flutuantes sobre Tokens quando seus Pontos de Vida diminuem ou aumentam.",
+    scope: "client",
+    config: !0,
+    type: Boolean,
+    default: !0
   });
 }
-function $() {
+function te() {
   try {
-    return !!game.settings.get(D, q.debug);
+    return !!game.settings.get(S, w.resourceFeedback);
+  } catch {
+    return !0;
+  }
+}
+function ne() {
+  try {
+    return !!game.settings.get(S, w.debug);
   } catch {
     return !1;
   }
 }
-function E(e) {
-  return `${k} | ${e}`;
+function v(e) {
+  return `${A} | ${e}`;
 }
-const u = {
+const c = {
   debug(e, ...t) {
-    $() && console.debug(E(e), ...t);
+    ne() && console.debug(v(e), ...t);
   },
   info(e, ...t) {
-    console.info(E(e), ...t);
+    console.info(v(e), ...t);
   },
   warn(e, ...t) {
-    console.warn(E(e), ...t);
+    console.warn(v(e), ...t);
   },
   error(e, ...t) {
-    console.error(E(e), ...t);
+    console.error(v(e), ...t);
   }
-}, Y = {
+}, re = {
   "paranormal-toolkit": "Paranormal Toolkit",
   sequencer: "Sequencer",
   JB2A_DnD5e: "JB2A"
 };
-function j() {
-  const e = U.filter((t) => !game.modules.get(t)?.active);
+function se() {
+  const e = Z.filter((t) => !game.modules.get(t)?.active);
   if (e.length > 0) {
-    const t = e.map((n) => Y[n] ?? n).join(", ");
-    return ui.notifications.error(`${k} requer os módulos ativos: ${t}.`), u.error("Missing required modules", e), !1;
+    const t = e.map((n) => re[n] ?? n).join(", ");
+    return ui.notifications.error(`${A} requer os módulos ativos: ${t}.`), c.error("Missing required modules", e), !1;
   }
-  return game.system.id !== C && (ui.notifications.warn(`${k} foi feito para o sistema Ordem Paranormal.`), u.warn("Unexpected system", { current: game.system.id, expected: C })), !0;
+  return game.system.id !== B && (ui.notifications.warn(`${A} foi feito para o sistema Ordem Paranormal.`), c.warn("Unexpected system", { current: game.system.id, expected: B })), !0;
 }
-const F = {
+const C = {
   ritualCastStarted: "paranormal-toolkit.ritual.cast.started",
   ritualAreaResolved: "paranormal-toolkit.ritual.area.resolved",
   ritualCastFinished: "paranormal-toolkit.ritual.cast.finished"
 };
-function W(e, t = null) {
+function oe(e, t = null) {
   const n = e.area ?? e.event?.area ?? t, r = n?.type ?? n?.areaType ?? null, s = e.targets ?? e.event?.targets ?? n?.targets ?? [];
   return {
     castId: e.castId ?? null,
@@ -69,15 +84,15 @@ function W(e, t = null) {
     sourcePayload: e
   };
 }
-function B(e) {
+function Y(e) {
   return e?.type ?? e?.areaType ?? null;
 }
 function h(e) {
   return e ? {
-    type: B(e),
+    type: Y(e),
     sceneId: y(e.sceneId),
     regionId: y(e.regionId),
-    gridSize: c(e.gridSize),
+    gridSize: l(e.gridSize),
     bounds: e.bounds ?? null,
     shape: e.shape ?? null,
     center: e.center ?? null,
@@ -92,7 +107,7 @@ function h(e) {
     shapeY: e.shape?.y ?? null
   } : null;
 }
-function J(e) {
+function ie(e) {
   if (!e) return null;
   if (e.type === "point")
     return {
@@ -110,7 +125,7 @@ function J(e) {
           start: n.start,
           end: n.end,
           delta: r,
-          distance: I(r),
+          distance: b(r),
           angleDegrees: p(r),
           targetTokenId: n.targetTokenId ?? null,
           targetTokenName: n.targetTokenName ?? null
@@ -124,87 +139,87 @@ function J(e) {
     start: e.start,
     end: e.end,
     delta: t,
-    distance: I(t),
+    distance: b(t),
     angleDegrees: p(t),
     diagnostics: e.diagnostics ?? null
   };
 }
-function K(e, t) {
-  return e.placementMode === "rectangleRayLine" ? Q(t.area) : e.placementMode === "sourceToTargetLine" ? re(t) : e.placementMode === "sourceToEachTargetLine" ? se(t, e.staggerMs ?? 500) : ie(t);
+function ae(e, t) {
+  return e.placementMode === "rectangleRayLine" ? ue(t.area) : e.placementMode === "sourceToTargetLine" ? ge(t) : e.placementMode === "sourceToEachTargetLine" ? he(t, e.staggerMs ?? 500) : me(t);
 }
-function Q(e) {
-  if (!e || B(e) !== "rectangleRay") return null;
-  const t = Z(e);
+function ue(e) {
+  if (!e || Y(e) !== "rectangleRay") return null;
+  const t = ce(e);
   if (t) return t;
-  const n = ee(e);
+  const n = le(e);
   if (n) return n;
-  const r = te(e);
-  return r || ne(e);
+  const r = de(e);
+  return r || fe(e);
 }
-function Z(e) {
-  const t = v(e.ray?.start), n = v(e.ray?.end);
-  return !t || !n || _(t, n) ? null : R("explicitRay", e, t, n);
+function ce(e) {
+  const t = q(e.ray?.start), n = q(e.ray?.end);
+  return !t || !n || X(t, n) ? null : E("explicitRay", e, t, n);
 }
-function ee(e) {
+function le(e) {
   const t = e.shape;
   if (!t) return null;
-  const n = c(t.x), r = c(t.y), s = f(t.width ?? e.length), i = c(t.height ?? e.width) ?? 0, o = c(t.direction ?? e.rotation) ?? 0;
+  const n = l(t.x), r = l(t.y), s = g(t.width ?? e.length), o = l(t.height ?? e.width) ?? 0, a = l(t.direction ?? e.rotation) ?? 0;
   if (n === null || r === null || s === null) return null;
-  const a = z(o), d = {
-    x: Math.cos(a),
-    y: Math.sin(a)
-  }, g = {
-    x: -Math.sin(a),
-    y: Math.cos(a)
-  }, T = i / 2, b = {
-    x: n + g.x * T,
-    y: r + g.y * T
+  const i = W(a), d = {
+    x: Math.cos(i),
+    y: Math.sin(i)
+  }, f = {
+    x: -Math.sin(i),
+    y: Math.cos(i)
+  }, T = o / 2, k = {
+    x: n + f.x * T,
+    y: r + f.y * T
   }, P = {
-    x: b.x + d.x * s,
-    y: b.y + d.y * s
+    x: k.x + d.x * s,
+    y: k.y + d.y * s
   };
   return {
-    ...R("rectangleShape", e, b, P),
+    ...E("rectangleShape", e, k, P),
     diagnostics: {
       strategy: "rectangleShape",
       area: h(e),
       resolved: {
-        start: b,
+        start: k,
         end: P,
-        delta: m(b, P),
-        distance: I(m(b, P)),
-        angleDegrees: p(m(b, P)),
+        delta: m(k, P),
+        distance: b(m(k, P)),
+        angleDegrees: p(m(k, P)),
         length: s,
-        width: i,
-        directionDegrees: o,
-        directionRadians: a,
+        width: o,
+        directionDegrees: a,
+        directionRadians: i,
         lengthVector: d,
-        perpendicularVector: g
+        perpendicularVector: f
       }
     }
   };
 }
-function te(e) {
-  const t = v(e.center), n = f(e.shape?.width ?? e.length), r = c(e.shape?.direction ?? e.rotation) ?? 0;
+function de(e) {
+  const t = q(e.center), n = g(e.shape?.width ?? e.length), r = l(e.shape?.direction ?? e.rotation) ?? 0;
   if (!t || n === null) return null;
-  const s = z(r), i = n / 2, o = Math.cos(s) * i, a = Math.sin(s) * i, d = {
-    x: t.x - o,
-    y: t.y - a
-  }, g = {
-    x: t.x + o,
-    y: t.y + a
+  const s = W(r), o = n / 2, a = Math.cos(s) * o, i = Math.sin(s) * o, d = {
+    x: t.x - a,
+    y: t.y - i
+  }, f = {
+    x: t.x + a,
+    y: t.y + i
   };
   return {
-    ...R("centerAndShape", e, d, g),
+    ...E("centerAndShape", e, d, f),
     diagnostics: {
       strategy: "centerAndShape",
       area: h(e),
       resolved: {
         start: d,
-        end: g,
-        delta: m(d, g),
-        distance: I(m(d, g)),
-        angleDegrees: p(m(d, g)),
+        end: f,
+        delta: m(d, f),
+        distance: b(m(d, f)),
+        angleDegrees: p(m(d, f)),
         length: n,
         directionDegrees: r,
         directionRadians: s
@@ -212,39 +227,39 @@ function te(e) {
     }
   };
 }
-function ne(e) {
+function fe(e) {
   const t = e.bounds;
   if (!t) return null;
-  const n = c(t.x), r = c(t.y), s = f(t.width), i = f(t.height);
-  if (n === null || r === null || s === null || i === null) return null;
-  if (s >= i) {
-    const a = r + i / 2;
-    return R("bounds", e, { x: n, y: a }, { x: n + s, y: a });
+  const n = l(t.x), r = l(t.y), s = g(t.width), o = g(t.height);
+  if (n === null || r === null || s === null || o === null) return null;
+  if (s >= o) {
+    const i = r + o / 2;
+    return E("bounds", e, { x: n, y: i }, { x: n + s, y: i });
   }
-  const o = n + s / 2;
-  return R("bounds", e, { x: o, y: r }, { x: o, y: r + i });
+  const a = n + s / 2;
+  return E("bounds", e, { x: a, y: r }, { x: a, y: r + o });
 }
-function re(e) {
-  const t = M(l(e.sourcePayload, "caster.token")), n = M(e.targets[0]);
+function ge(e) {
+  const t = D(u(e.sourcePayload, "caster.token")), n = D(e.targets[0]);
   if (!t?.tokenId || !n?.tokenId) return null;
-  const r = S(t), s = S(n);
+  const r = L(t), s = L(n);
   if (!r || !s) return null;
-  const i = X(r, s.center), o = s.center;
-  if (_(i, o)) return null;
-  const a = m(i, o);
+  const o = K(r, s.center), a = s.center;
+  if (X(o, a)) return null;
+  const i = m(o, a);
   return {
     type: "line",
-    start: i,
-    end: o,
+    start: o,
+    end: a,
     diagnostics: {
       strategy: "sourceToTarget",
       area: h(e.area),
       resolved: {
-        start: i,
-        end: o,
-        delta: a,
-        distance: I(a),
-        angleDegrees: p(a),
+        start: o,
+        end: a,
+        delta: i,
+        distance: b(i),
+        angleDegrees: p(i),
         sourceTokenId: r.tokenId,
         targetTokenId: s.tokenId,
         sourceTokenName: r.name,
@@ -253,33 +268,33 @@ function re(e) {
         targetCenter: s.center,
         sourceBounds: r.bounds,
         targetBounds: s.bounds,
-        startOffset: I(m(r.center, i))
+        startOffset: b(m(r.center, o))
       }
     }
   };
 }
-function se(e, t) {
-  const n = M(l(e.sourcePayload, "caster.token"));
+function he(e, t) {
+  const n = D(u(e.sourcePayload, "caster.token"));
   if (!n?.tokenId) return null;
-  const r = S(n);
+  const r = L(n);
   if (!r) return null;
-  const s = /* @__PURE__ */ new Set(), i = [];
-  for (const o of e.targets) {
-    const a = M(o);
-    if (!a?.tokenId || s.has(a.tokenId)) continue;
-    const d = S(a);
+  const s = /* @__PURE__ */ new Set(), o = [];
+  for (const a of e.targets) {
+    const i = D(a);
+    if (!i?.tokenId || s.has(i.tokenId)) continue;
+    const d = L(i);
     if (!d) continue;
-    const g = X(r, d.center), T = d.center;
-    _(g, T) || (s.add(a.tokenId), i.push({
-      start: g,
+    const f = K(r, d.center), T = d.center;
+    X(f, T) || (s.add(i.tokenId), o.push({
+      start: f,
       end: T,
       targetTokenId: d.tokenId,
       targetTokenName: d.name
     }));
   }
-  return i.length === 0 ? null : {
+  return o.length === 0 ? null : {
     type: "lineGroup",
-    lines: i,
+    lines: o,
     staggerMs: t,
     diagnostics: {
       strategy: "sourceToTargets",
@@ -293,7 +308,7 @@ function se(e, t) {
     }
   };
 }
-function ie(e) {
+function me(e) {
   const t = e.targets[0];
   return t ? {
     type: "point",
@@ -304,7 +319,7 @@ function ie(e) {
     }
   } : null;
 }
-function R(e, t, n, r) {
+function E(e, t, n, r) {
   const s = m(n, r);
   return {
     type: "line",
@@ -317,56 +332,56 @@ function R(e, t, n, r) {
         start: n,
         end: r,
         delta: s,
-        distance: I(s),
+        distance: b(s),
         angleDegrees: p(s)
       }
     }
   };
 }
-function S(e) {
-  const t = oe(e);
+function L(e) {
+  const t = ye(e);
   if (!t) return null;
-  const n = N(t, "center") ?? N(t, "document.center"), r = ae(t, n), s = n ?? (r ? ue(r) : null);
+  const n = U(t, "center") ?? U(t, "document.center"), r = Te(t, n), s = n ?? (r ? ke(r) : null);
   return !s || !r ? null : {
     tokenId: e.tokenId,
-    name: e.name ?? A(t, "name") ?? A(t, "document.name"),
+    name: e.name ?? N(t, "name") ?? N(t, "document.name"),
     center: s,
     bounds: r
   };
 }
-function oe(e) {
-  const t = G(), n = e.tokenId;
+function ye(e) {
+  const t = J(), n = e.tokenId;
   if (!t || !n) return null;
   const r = y(t.scene?.id);
   if (e.sceneId && r && e.sceneId !== r) return null;
   const s = t.tokens?.get?.(n);
-  return s || (t.tokens?.placeables?.find((i) => A(i, "id") === n || A(i, "document.id") === n) ?? null);
+  return s || (t.tokens?.placeables?.find((o) => N(o, "id") === n || N(o, "document.id") === n) ?? null);
 }
-function ae(e, t) {
-  const n = le(l(e, "bounds"));
+function Te(e, t) {
+  const n = be(u(e, "bounds"));
   if (n) return n;
-  const r = f(G()?.grid?.size) ?? 100, s = f(l(e, "w")) ?? f(l(e, "width")) ?? O(l(e, "document.width"), r) ?? r, i = f(l(e, "h")) ?? f(l(e, "height")) ?? O(l(e, "document.height"), r) ?? r, o = c(l(e, "x")) ?? c(l(e, "document.x")), a = c(l(e, "y")) ?? c(l(e, "document.y"));
-  return o !== null && a !== null ? { x: o, y: a, width: s, height: i } : t ? {
+  const r = g(J()?.grid?.size) ?? 100, s = g(u(e, "w")) ?? g(u(e, "width")) ?? z(u(e, "document.width"), r) ?? r, o = g(u(e, "h")) ?? g(u(e, "height")) ?? z(u(e, "document.height"), r) ?? r, a = l(u(e, "x")) ?? l(u(e, "document.x")), i = l(u(e, "y")) ?? l(u(e, "document.y"));
+  return a !== null && i !== null ? { x: a, y: i, width: s, height: o } : t ? {
     x: t.x - s / 2,
-    y: t.y - i / 2,
+    y: t.y - o / 2,
     width: s,
-    height: i
+    height: o
   } : null;
 }
-function X(e, t) {
-  const n = m(e.center, t), r = I(n);
+function K(e, t) {
+  const n = m(e.center, t), r = b(n);
   if (r <= 0) return e.center;
   const s = {
     x: n.x / r,
     y: n.y / r
-  }, i = Math.max(0, e.bounds.width / 2), o = Math.max(0, e.bounds.height / 2), a = Math.abs(s.x) > 1e-4 ? i / Math.abs(s.x) : Number.POSITIVE_INFINITY, d = Math.abs(s.y) > 1e-4 ? o / Math.abs(s.y) : Number.POSITIVE_INFINITY, g = Math.min(a, d), T = Number.isFinite(g) ? g : Math.max(i, o, 0);
+  }, o = Math.max(0, e.bounds.width / 2), a = Math.max(0, e.bounds.height / 2), i = Math.abs(s.x) > 1e-4 ? o / Math.abs(s.x) : Number.POSITIVE_INFINITY, d = Math.abs(s.y) > 1e-4 ? a / Math.abs(s.y) : Number.POSITIVE_INFINITY, f = Math.min(i, d), T = Number.isFinite(f) ? f : Math.max(o, a, 0);
   return {
     x: e.center.x + s.x * T,
     y: e.center.y + s.y * T
   };
 }
-function M(e) {
-  if (!w(e)) return null;
+function D(e) {
+  if (!_(e)) return null;
   const t = y(e.tokenId) ?? y(e.id);
   return t ? {
     tokenId: t,
@@ -375,19 +390,19 @@ function M(e) {
     name: y(e.name)
   } : null;
 }
-function v(e) {
-  const t = c(e?.x), n = c(e?.y);
+function q(e) {
+  const t = l(e?.x), n = l(e?.y);
   return t === null || n === null ? null : { x: t, y: n };
 }
-function N(e, t) {
-  const n = l(e, t), r = c(l(n, "x")), s = c(l(n, "y"));
+function U(e, t) {
+  const n = u(e, t), r = l(u(n, "x")), s = l(u(n, "y"));
   return r === null || s === null ? null : { x: r, y: s };
 }
-function le(e) {
-  const t = c(l(e, "x")), n = c(l(e, "y")), r = f(l(e, "width")), s = f(l(e, "height"));
+function be(e) {
+  const t = l(u(e, "x")), n = l(u(e, "y")), r = g(u(e, "width")), s = g(u(e, "height"));
   return t === null || n === null || r === null || s === null ? null : { x: t, y: n, width: r, height: s };
 }
-function ue(e) {
+function ke(e) {
   return {
     x: e.x + e.width / 2,
     y: e.y + e.height / 2
@@ -404,99 +419,99 @@ function m(e, t) {
     y: t.y - e.y
   };
 }
-function I(e) {
+function b(e) {
   return Math.hypot(e.x, e.y);
 }
 function p(e) {
-  return ce(Math.atan2(e.y, e.x));
+  return Ie(Math.atan2(e.y, e.x));
 }
-function c(e) {
+function l(e) {
   return typeof e == "number" && Number.isFinite(e) ? e : null;
 }
-function f(e) {
-  const t = c(e);
+function g(e) {
+  const t = l(e);
   return t !== null && t > 0 ? t : null;
 }
-function O(e, t) {
-  const n = f(e);
+function z(e, t) {
+  const n = g(e);
   return n !== null ? n * t : null;
 }
-function z(e) {
+function W(e) {
   return e * Math.PI / 180;
 }
-function ce(e) {
+function Ie(e) {
   return e * 180 / Math.PI;
 }
-function _(e, t) {
+function X(e, t) {
   return e.x === t.x && e.y === t.y;
 }
-function A(e, t) {
-  return y(l(e, t));
+function N(e, t) {
+  return y(u(e, t));
 }
-function l(e, t) {
-  if (!w(e)) return;
+function u(e, t) {
+  if (!_(e)) return;
   let n = e;
   for (const r of t.split(".")) {
-    if (!w(n)) return;
+    if (!_(n)) return;
     n = n[r];
   }
   return n;
 }
-function G() {
+function J() {
   const e = globalThis.canvas;
-  return w(e) ? e : null;
+  return _(e) ? e : null;
 }
-function w(e) {
+function _(e) {
   return !!(e && typeof e == "object");
 }
-function de() {
+function pe() {
   const e = globalThis.Sequence;
   return typeof e == "function" ? e : null;
 }
-class ge {
+class Pe {
   async playRitualPreset(t, n) {
-    const r = de();
+    const r = pe();
     if (!r) {
-      u.warn("Sequencer API is not available at runtime.");
+      c.warn("Sequencer API is not available at runtime.");
       return;
     }
     if (!t.effectPath) {
-      u.warn("Ritual FX preset has no effect path configured yet.", t.id);
+      c.warn("Ritual FX preset has no effect path configured yet.", t.id);
       return;
     }
     if (n.type === "lineGroup") {
-      await this.playLineGroupPreset(r, t, n), u.debug("Played ritual FX preset", { preset: t.id, placement: n });
+      await this.playLineGroupPreset(r, t, n), c.debug("Played ritual FX preset", { preset: t.id, placement: n });
       return;
     }
-    await this.playSinglePreset(r, t, n), u.debug("Played ritual FX preset", { preset: t.id, placement: n });
+    await this.playSinglePreset(r, t, n), c.debug("Played ritual FX preset", { preset: t.id, placement: n });
   }
   async playLineGroupPreset(t, n, r) {
     const s = Math.max(0, r.staggerMs ?? n.staggerMs ?? 0);
-    for (const [i, o] of r.lines.entries()) {
-      const a = {
+    for (const [o, a] of r.lines.entries()) {
+      const i = {
         type: "line",
-        start: o.start,
-        end: o.end
+        start: a.start,
+        end: a.end
       };
-      this.playSinglePreset(t, n, a, `${n.id}.${i}`), i < r.lines.length - 1 && s > 0 && await he(s);
+      this.playSinglePreset(t, n, i, `${n.id}.${o}`), o < r.lines.length - 1 && s > 0 && await Se(s);
     }
   }
   async playSinglePreset(t, n, r, s = n.id) {
-    const i = new t({ moduleName: D }), o = i.effect().name(s).file(n.effectPath);
-    fe(o, r), n.scale && o.scale(n.scale), await i.play();
+    const o = new t({ moduleName: S }), a = o.effect().name(s).file(n.effectPath);
+    Re(a, r), n.scale && a.scale(n.scale), await o.play();
   }
 }
-function fe(e, t) {
+function Re(e, t) {
   if (t.type === "line") {
     e.atLocation(t.start).stretchTo(t.end);
     return;
   }
   e.atLocation(t.location);
 }
-function he(e) {
+function Se(e) {
   return new Promise((t) => setTimeout(t, e));
 }
-class me {
+class Ee {
   #e = /* @__PURE__ */ new Map();
   register(t) {
     this.#e.set(t.id, t);
@@ -506,7 +521,7 @@ class me {
   }
   findMatchingPreset(t) {
     for (const n of this.#e.values())
-      if (ye(n, t))
+      if (ve(n, t))
         return n;
     return null;
   }
@@ -514,17 +529,17 @@ class me {
     return [...this.#e.values()];
   }
 }
-function ye(e, t) {
+function ve(e, t) {
   return !(e.match.toolkitPresetId !== t.toolkitPresetId || e.match.form && e.match.form !== t.form || e.match.areaType && e.match.areaType !== t.areaType);
 }
-const H = new me();
-class Te {
-  constructor(t = new ge()) {
+const Q = new Ee();
+class xe {
+  constructor(t = new Pe()) {
     this.sequencerAdapter = t;
   }
   sequencerAdapter;
   async handleRitualFinished(t) {
-    if (u.debug("Handling ritual FX context", {
+    if (c.debug("Handling ritual FX context", {
       castId: t.castId,
       toolkitPresetId: t.toolkitPresetId,
       form: t.form,
@@ -533,54 +548,54 @@ class Te {
       targetCount: t.targets.length,
       area: h(t.area)
     }), !t.fxEligible) {
-      u.debug("Ignoring ritual because payload is not FX eligible", t);
+      c.debug("Ignoring ritual because payload is not FX eligible", t);
       return;
     }
     if (!t.toolkitPresetId) {
-      u.debug("Ignoring ritual without toolkit preset id", t);
+      c.debug("Ignoring ritual without toolkit preset id", t);
       return;
     }
-    const n = H.findMatchingPreset(t);
+    const n = Q.findMatchingPreset(t);
     if (!n) {
-      u.debug("No Ritual FX preset matched this ritual context", t);
+      c.debug("No Ritual FX preset matched this ritual context", t);
       return;
     }
-    u.debug("Matched Ritual FX preset", {
+    c.debug("Matched Ritual FX preset", {
       preset: n,
       area: h(t.area)
     });
-    const r = K(n, t);
+    const r = ae(n, t);
     if (!r) {
-      u.debug("No Ritual FX placement could be resolved", {
+      c.debug("No Ritual FX placement could be resolved", {
         preset: n,
         area: h(t.area),
         context: t
       });
       return;
     }
-    u.debug("Resolved ritual FX placement", {
+    c.debug("Resolved ritual FX placement", {
       preset: n.id,
-      placement: J(r),
+      placement: ie(r),
       rawPlacement: r
     }), await this.sequencerAdapter.playRitualPreset(n, r);
   }
 }
 const x = /* @__PURE__ */ new Map();
-function Ie(e = new Te()) {
-  Hooks.on(F.ritualCastStarted, (t) => {
-    t.castId && x.delete(t.castId), u.debug("Ritual cast started", L(t));
-  }), Hooks.on(F.ritualAreaResolved, (t) => {
+function Me(e = new xe()) {
+  Hooks.on(C.ritualCastStarted, (t) => {
+    t.castId && x.delete(t.castId), c.debug("Ritual cast started", O(t));
+  }), Hooks.on(C.ritualAreaResolved, (t) => {
     const n = t.area ?? t.event?.area;
-    t.castId && n && x.set(t.castId, n), u.debug("Ritual area resolved", {
-      lifecycle: L(t),
+    t.castId && n && x.set(t.castId, n), c.debug("Ritual area resolved", {
+      lifecycle: O(t),
       area: h(n ?? null),
       rawArea: n ?? null,
       rawPayload: t
     });
-  }), Hooks.on(F.ritualCastFinished, (t) => {
-    const n = t.castId ? x.get(t.castId) ?? null : null, r = W(t, n);
-    u.debug("Ritual cast finished", {
-      lifecycle: L(t),
+  }), Hooks.on(C.ritualCastFinished, (t) => {
+    const n = t.castId ? x.get(t.castId) ?? null : null, r = oe(t, n);
+    c.debug("Ritual cast finished", {
+      lifecycle: O(t),
       cachedArea: h(n),
       normalizedArea: h(r.area),
       normalizedContext: {
@@ -593,11 +608,11 @@ function Ie(e = new Te()) {
       },
       rawPayload: t
     }), e.handleRitualFinished(r).catch((s) => {
-      u.error("Failed to play ritual FX", s, r);
+      c.error("Failed to play ritual FX", s, r);
     }), t.castId && x.delete(t.castId);
-  }), u.info("Ritual FX listeners registered.");
+  }), c.info("Ritual FX listeners registered.");
 }
-function L(e) {
+function O(e) {
   return {
     version: e.version ?? null,
     type: e.type ?? null,
@@ -611,8 +626,149 @@ function L(e) {
     targetCount: Array.isArray(e.targets) ? e.targets.length : Array.isArray(e.event?.targets) ? e.event.targets.length : null
   };
 }
-const be = "jb2a.chain_lightning.primary.blue.60ft", pe = "jb2a.chain_lightning.primary.blue.60ft", Pe = "jb2a.chain_lightning.primary.blue.60ft";
-function Re(e = be) {
+const R = {
+  damage: 16724787,
+  healing: 3399031,
+  duration: 1500,
+  distance: 60,
+  stroke: 1118481,
+  strokeThickness: 5
+};
+class Fe {
+  constructor(t = new Ae()) {
+    this.port = t;
+  }
+  port;
+  render(t, n) {
+    const r = n.kind === "damage" ? "-" : "+", s = Math.max(24, Math.min(36, Math.round(Math.min(t.w, t.h) * 0.32)));
+    return this.port.create(t.center, `${r}${n.amount}`, {
+      anchor: CONST.TEXT_ANCHOR_POINTS.CENTER,
+      direction: CONST.TEXT_ANCHOR_POINTS.TOP,
+      distance: R.distance,
+      duration: R.duration,
+      fill: R[n.kind],
+      fontSize: s,
+      stroke: R.stroke,
+      strokeThickness: R.strokeThickness
+    });
+  }
+}
+class Ae {
+  async create(t, n, r) {
+    await canvas.interface.createScrollingText(t, n, r);
+  }
+}
+function we(e, t) {
+  return e.isGM ? !0 : !t.actor?.testUserPermission(e, "OBSERVER") || t.document.hidden ? !1 : t.visible;
+}
+function M(e) {
+  return `${e.kind}:${e.uuid}`;
+}
+class Le {
+  #e = /* @__PURE__ */ new Map();
+  hydrate(t, n) {
+    this.#e.set(M(t), n);
+  }
+  transition(t, n) {
+    const r = M(t), s = this.#e.get(r);
+    if (this.#e.set(r, n), s === void 0) return null;
+    const o = n - s;
+    return o === 0 ? null : {
+      kind: o < 0 ? "damage" : "healing",
+      amount: Math.abs(o),
+      delta: o
+    };
+  }
+  delete(t) {
+    this.#e.delete(M(t));
+  }
+  clear() {
+    this.#e.clear();
+  }
+  get(t) {
+    return this.#e.get(M(t));
+  }
+}
+function H(e) {
+  return e.isToken ? e.token?.uuid ? { kind: "token", uuid: e.token.uuid } : null : e.uuid ? { kind: "actor", uuid: e.uuid } : null;
+}
+function De(e, t) {
+  if (!t) return [];
+  if (e.isToken) {
+    const n = e.token;
+    if (!n || n.parent?.id !== t.id) return [];
+    const r = t.tokens.contents.find((s) => s.uuid === n.uuid);
+    return r?.object ? [r.object] : [];
+  }
+  return t.tokens.contents.filter((n) => n.actorLink && n.actor?.uuid === e.uuid).map((n) => n.object).filter((n) => n !== null);
+}
+function G(e) {
+  return e.actor;
+}
+function F(e) {
+  return typeof e == "object" && e !== null ? e : null;
+}
+function V(e) {
+  return typeof e == "number" && Number.isFinite(e) ? e : null;
+}
+function $(e) {
+  const t = F(e.system);
+  return t ? e.type === "agent" ? V(F(t.PV)?.value) : e.type === "threat" ? V(F(F(t.attributes)?.hp)?.value) : null : null;
+}
+class Ne {
+  constructor(t = new Le(), n = new Fe(), r = _e) {
+    this.store = t, this.renderer = n, this.environment = r;
+  }
+  store;
+  renderer;
+  environment;
+  hydrate(t) {
+    if (this.store.clear(), !!t)
+      for (const n of t.tokens.contents) this.hydrateToken(n);
+  }
+  hydrateToken(t) {
+    const n = G(t);
+    if (!n) return;
+    const r = H(n), s = $(n);
+    r && s !== null && this.store.hydrate(r, s);
+  }
+  removeToken(t) {
+    const n = G(t);
+    if (!n?.isToken) return;
+    const r = H(n);
+    r && this.store.delete(r);
+  }
+  clear() {
+    this.store.clear();
+  }
+  handleActorUpdate(t) {
+    const n = H(t), r = $(t);
+    if (!n || r === null) return;
+    const s = this.store.transition(n, r);
+    if (!s) return;
+    const o = this.environment.scene();
+    if (!o || !this.environment.enabled()) return;
+    const a = this.environment.user();
+    for (const i of De(t, o))
+      we(a, i) && this.renderer.render(i, s);
+  }
+}
+const _e = {
+  scene: () => canvas.scene,
+  user: () => game.user,
+  enabled: te
+}, I = new Ne(), j = /* @__PURE__ */ Symbol.for("paranormal-fx.resource-feedback.registered");
+function Ce() {
+  return globalThis;
+}
+function Oe() {
+  const e = Ce();
+  e[j] || game.system.id !== B || (e[j] = !0, Hooks.on("updateActor", (t) => I.handleActorUpdate(t)), Hooks.on("canvasReady", () => I.hydrate(canvas.scene)), Hooks.on("canvasTearDown", () => I.clear()), Hooks.on("createToken", (t) => {
+    t.parent?.id === canvas.scene?.id && I.hydrateToken(t);
+  }), Hooks.on("deleteToken", (t) => I.removeToken(t)), canvas.ready && I.hydrate(canvas.scene), c.info("Resource feedback listeners registered."));
+}
+const He = "jb2a.chain_lightning.primary.blue.60ft", Be = "jb2a.chain_lightning.primary.blue.60ft", qe = "jb2a.chain_lightning.primary.blue.60ft";
+function Xe(e = He) {
   return {
     id: "ritual.eletrocussao.standard.singleTarget",
     label: "Eletrocussão Padrão - Alvo",
@@ -624,7 +780,7 @@ function Re(e = be) {
     placementMode: "sourceToTargetLine"
   };
 }
-function Ee(e = pe) {
+function Ue(e = Be) {
   return {
     id: "ritual.eletrocussao.student.rectangleRay",
     label: "Eletrocussão Discente - Linha",
@@ -637,7 +793,7 @@ function Ee(e = pe) {
     placementMode: "rectangleRayLine"
   };
 }
-function xe(e = Pe) {
+function ze(e = qe) {
   return {
     id: "ritual.eletrocussao.true.multiTarget",
     label: "Eletrocussão Verdadeira - Multi Alvo",
@@ -650,17 +806,17 @@ function xe(e = Pe) {
     staggerMs: 500
   };
 }
-function ke() {
+function Ge() {
   return [
-    Re(),
-    Ee(),
-    xe()
+    Xe(),
+    Ue(),
+    ze()
   ];
 }
 Hooks.once("init", () => {
-  V(), H.registerMany(ke()), u.info("Initialized.");
+  ee(), Q.registerMany(Ge()), c.info("Initialized.");
 });
 Hooks.once("ready", () => {
-  j() && (Ie(), u.info(`${k} ready.`));
+  Oe(), se() && (Me(), c.info(`${A} ready.`));
 });
 //# sourceMappingURL=main.js.map

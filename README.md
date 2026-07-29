@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.2.1
+0.3.0
 ```
 
 ## Objetivo
@@ -28,6 +28,27 @@ Responsabilidades:
 - tocar animações via Sequencer;
 - usar assets JB2A instalados pelo usuário;
 - manter efeitos opcionais e configuráveis no futuro.
+
+## Texto flutuante de dano e cura
+
+A versão 0.3.0 exibe números nativos sobre Tokens quando o valor real de PV/HP de
+um Actor muda: reduções aparecem em vermelho como dano (`-12`) e aumentos em
+verde como cura (`+8`). Agentes usam `system.PV.value` e ameaças usam
+`system.attributes.hp.value`; PE, PD e SAN não são observados.
+
+A detecção acompanha atualizações reais do Actor no Foundry. Por isso, edições
+manuais, macros, regras do sistema e outros módulos — inclusive o Paranormal
+Toolkit — podem produzir o feedback sem integração específica.
+
+O GM pode ver o feedback de todos os Tokens na cena ativa. Para jogadores, o
+Paranormal FX só renderiza o texto quando o Actor concede OBSERVER ou nível
+superior, o Token não está oculto e está visualmente disponível no canvas. A
+filtragem acontece localmente antes da renderização e não registra visualmente o
+valor ou a posição de Tokens bloqueados.
+
+O setting de cliente **Texto flutuante de dano e cura** vem habilitado por padrão.
+Desabilitá-lo interrompe somente a renderização; os snapshots continuam
+atualizados para não produzir um delta acumulado ao reativá-lo.
 
 ## Dependências
 
@@ -136,6 +157,7 @@ src/
     sequencer/
   core/
   features/
+    resource-feedback/
     ritual-fx/
   types/
 ```
@@ -200,3 +222,11 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 - Adiciona FX para Eletrocussão Verdadeira com múltiplos alvos.
 - Cada raio parte da borda do token do conjurador até o centro do alvo correspondente.
 - Aplica atraso de 500 ms entre o início de cada disparo.
+
+### 0.3.0
+
+- Adiciona texto flutuante nativo para dano e cura pela variação real de PV/HP.
+- Suporta agentes e ameaças, incluindo Actors vinculados e sintéticos.
+- Aplica regras locais de permissão e visibilidade para evitar feedback indevido.
+- Adiciona setting de cliente e testes unitários para resolução, snapshots,
+  Tokens, policy e service.
