@@ -19,8 +19,8 @@ beforeAll(() => {
 
 describe("FloatingResourceTextRenderer", () => {
   it.each([
-    ["damage", 10, "-10", 0xff3333],
-    ["healing", 7, "+7", 0x33dd77],
+    ["damage", 10, "-10", "#ff3333"],
+    ["healing", 7, "+7", "#33dd77"],
   ] as const)("renders %s with Foundry v14 scrolling-text options", async (kind, amount, text, fill) => {
     create.mockClear();
     const renderer = new FloatingResourceTextRenderer({ create });
@@ -43,7 +43,7 @@ describe("FloatingResourceTextRenderer", () => {
         fill,
         fontSize: 32,
         fontWeight: "bold",
-        stroke: { color: 0x111111, width: 5 },
+        stroke: { color: "#111111", width: 5 },
       },
     });
     expect(options).not.toHaveProperty("fill");

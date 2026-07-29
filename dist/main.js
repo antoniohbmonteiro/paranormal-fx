@@ -627,12 +627,12 @@ function O(e) {
   };
 }
 const I = {
-  damage: 16724787,
-  healing: 3399031,
+  damage: "#ff3333",
+  healing: "#33dd77",
   duration: 1500,
   distance: 60,
   fontWeight: "bold",
-  strokeColor: 1118481,
+  strokeColor: "#111111",
   strokeWidth: 5
 };
 class Me {

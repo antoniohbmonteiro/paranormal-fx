@@ -1,12 +1,12 @@
 import type { ResourceTokenLike, ResourceTransition } from "./resource-feedback-types";
 
 const VISUALS = {
-  damage: 0xff3333,
-  healing: 0x33dd77,
+  damage: "#ff3333",
+  healing: "#33dd77",
   duration: 1500,
   distance: 60,
   fontWeight: "bold",
-  strokeColor: 0x111111,
+  strokeColor: "#111111",
   strokeWidth: 5,
 } as const;
 
@@ -25,11 +25,11 @@ export interface ScrollingTextOptions {
   duration: number;
   jitter?: number;
   textStyle: {
-    fill: number;
+    fill: string;
     fontSize: number;
     fontWeight: "bold";
     stroke: {
-      color: number;
+      color: string;
       width: number;
     };
   };
