@@ -6,6 +6,7 @@ node_modules/
 
 # Vite / TypeScript
 .vite/
+dist/
 *.tsbuildinfo
 
 # Coverage and test output

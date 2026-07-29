@@ -1,9 +1,29 @@
 export {};
 
-type FoundryScrollingTextOptions =
-  import("../features/resource-feedback/floating-resource-text-renderer").ScrollingTextOptions;
-
 declare global {
+  namespace PIXI {
+    class Text {
+      constructor(
+        content: string,
+        style: import("../features/resource-feedback/floating-resource-text-renderer").PixiTextStyleOptions,
+      );
+      alpha: number;
+      y: number;
+      anchor: { set(value: number): void };
+      position: { set(x: number, y: number): void };
+      destroy(): void;
+    }
+  }
+
+  namespace foundry.canvas.animation {
+    const CanvasAnimation: {
+      animate(
+        attributes: Array<{ parent: PIXI.Text; attribute: "y" | "alpha"; to: number }>,
+        options: { duration: number },
+      ): Promise<unknown>;
+    };
+  }
+
   const game: {
     system: {
       id: string;
@@ -25,19 +45,9 @@ declare global {
     ready: boolean;
     scene: import("../features/resource-feedback/resource-feedback-types").ResourceSceneLike | null;
     interface: {
-      createScrollingText(
-        position: { x: number; y: number },
-        content: string,
-        options: FoundryScrollingTextOptions,
-      ): Promise<unknown>;
-    };
-  };
-
-  const CONST: {
-    TEXT_ANCHOR_POINTS: {
-      CENTER: number;
-      TOP: number;
-    };
+      addChild(text: PIXI.Text): unknown;
+      removeChild(text: PIXI.Text): unknown;
+    } | null;
   };
 
   const ui: {
