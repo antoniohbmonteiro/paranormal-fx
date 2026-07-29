@@ -1,4 +1,5 @@
 import { isResourceFeedbackEnabled } from "../../core/settings";
+import { logger } from "../../core/logger";
 import { FloatingResourceTextRenderer } from "./floating-resource-text-renderer";
 import { canRenderResourceFeedback } from "./resource-feedback-policy";
 import { ResourceSnapshotStore } from "./resource-snapshot-store";
@@ -70,7 +71,9 @@ export class ResourceFeedbackService {
     const user = this.environment.user();
     for (const token of resolveTokensForActor(actor, scene)) {
       if (!canRenderResourceFeedback(user, token)) continue;
-      void this.renderer.render(token, transition);
+      void this.renderer.render(token, transition).catch(() => {
+        logger.warn("Failed to render floating resource text.");
+      });
     }
   }
 }

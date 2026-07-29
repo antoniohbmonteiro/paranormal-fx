@@ -8,5 +8,5 @@ export function canRenderResourceFeedback(
   const actor = token.actor;
   if (!actor?.testUserPermission(user, "OBSERVER")) return false;
   if (token.document.hidden) return false;
-  return token.visible;
+  return token.isVisible;
 }

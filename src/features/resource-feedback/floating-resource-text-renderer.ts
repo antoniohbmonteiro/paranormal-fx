@@ -5,8 +5,9 @@ const VISUALS = {
   healing: 0x33dd77,
   duration: 1500,
   distance: 60,
-  stroke: 0x111111,
-  strokeThickness: 5,
+  fontWeight: "bold",
+  strokeColor: 0x111111,
+  strokeWidth: 5,
 } as const;
 
 export interface ScrollingTextPort {
@@ -22,10 +23,16 @@ export interface ScrollingTextOptions {
   direction: number;
   distance: number;
   duration: number;
-  fill: number;
-  fontSize: number;
-  stroke: number;
-  strokeThickness: number;
+  jitter?: number;
+  textStyle: {
+    fill: number;
+    fontSize: number;
+    fontWeight: "bold";
+    stroke: {
+      color: number;
+      width: number;
+    };
+  };
 }
 
 export class FloatingResourceTextRenderer {
@@ -39,10 +46,15 @@ export class FloatingResourceTextRenderer {
       direction: CONST.TEXT_ANCHOR_POINTS.TOP,
       distance: VISUALS.distance,
       duration: VISUALS.duration,
-      fill: VISUALS[transition.kind],
-      fontSize,
-      stroke: VISUALS.stroke,
-      strokeThickness: VISUALS.strokeThickness,
+      textStyle: {
+        fill: VISUALS[transition.kind],
+        fontSize,
+        fontWeight: VISUALS.fontWeight,
+        stroke: {
+          color: VISUALS.strokeColor,
+          width: VISUALS.strokeWidth,
+        },
+      },
     });
   }
 }

@@ -2,9 +2,9 @@ import { describe, expect, it } from "vitest";
 import { canRenderResourceFeedback } from "./resource-feedback-policy";
 import type { ResourceActorLike, ResourceTokenLike } from "./resource-feedback-types";
 
-function token(permission: boolean, hidden = false, visible = true): ResourceTokenLike {
+function token(permission: boolean, hidden = false, isVisible = true): ResourceTokenLike {
   const actor = { testUserPermission: () => permission } as unknown as ResourceActorLike;
-  return { actor, visible, document: { hidden } } as ResourceTokenLike;
+  return { actor, isVisible, document: { hidden } } as ResourceTokenLike;
 }
 
 describe("canRenderResourceFeedback", () => {

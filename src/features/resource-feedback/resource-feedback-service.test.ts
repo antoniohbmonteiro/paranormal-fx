@@ -10,7 +10,7 @@ function fixture(value = 30, count = 1) {
   const scene = { id: "s", tokens: { contents: [] } } as ResourceSceneLike;
   for (let i = 0; i < count; i += 1) {
     const doc = { uuid: `Scene.s.Token.${i}`, actorLink: true, hidden: false, parent: scene, actor } as ResourceTokenDocumentLike;
-    doc.object = { document: doc, actor, visible: true, center: { x: 0, y: 0 }, w: 100, h: 100 } as ResourceTokenLike;
+    doc.object = { document: doc, actor, isVisible: true, center: { x: 0, y: 0 }, w: 100, h: 100 } as ResourceTokenLike;
     scene.tokens.contents.push(doc);
   }
   return { actor, scene };
@@ -78,5 +78,21 @@ describe("ResourceFeedbackService", () => {
     const service = new ResourceFeedbackService(undefined, { render }, { scene: () => scene, user: () => ({ isGM: true }), enabled: () => true });
     service.hydrateToken(scene.tokens.contents[0]);
     expect(render).not.toHaveBeenCalled();
+  });
+
+  it("consumes renderer rejections without exposing resource or token details", async () => {
+    const { actor, scene } = fixture();
+    const render = vi.fn().mockRejectedValue(new Error("canvas unavailable"));
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    const service = new ResourceFeedbackService(undefined, { render }, { scene: () => scene, user: () => ({ isGM: true }), enabled: () => true });
+    service.hydrate(scene);
+    actor.system = { PV: { value: 20 } };
+
+    expect(() => service.handleActorUpdate(actor)).not.toThrow();
+    await Promise.resolve();
+
+    expect(warn).toHaveBeenCalledOnce();
+    expect(warn.mock.calls[0].join(" ")).toBe("Paranormal FX | Failed to render floating resource text.");
+    warn.mockRestore();
   });
 });

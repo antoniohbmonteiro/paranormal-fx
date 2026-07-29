@@ -39,7 +39,7 @@ export interface ResourceTokenDocumentLike {
 export interface ResourceTokenLike {
   document: ResourceTokenDocumentLike;
   actor: ResourceActorLike | null;
-  visible: boolean;
+  isVisible: boolean;
   center: { x: number; y: number };
   w: number;
   h: number;

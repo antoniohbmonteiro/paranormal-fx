@@ -1,5 +1,8 @@
 export {};
 
+type FoundryScrollingTextOptions =
+  import("../features/resource-feedback/floating-resource-text-renderer").ScrollingTextOptions;
+
 declare global {
   const game: {
     system: {
@@ -25,7 +28,7 @@ declare global {
       createScrollingText(
         position: { x: number; y: number },
         content: string,
-        options: import("../features/resource-feedback/floating-resource-text-renderer").ScrollingTextOptions,
+        options: FoundryScrollingTextOptions,
       ): Promise<unknown>;
     };
   };
