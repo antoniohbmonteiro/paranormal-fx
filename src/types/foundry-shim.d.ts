@@ -9,6 +9,7 @@ declare global {
       );
       alpha: number;
       y: number;
+      zIndex: number;
       anchor: { set(value: number): void };
       position: { set(x: number, y: number): void };
       destroy(): void;
@@ -45,8 +46,11 @@ declare global {
     ready: boolean;
     scene: import("../features/resource-feedback/resource-feedback-types").ResourceSceneLike | null;
     interface: {
+      children: ReadonlyArray<{ zIndex: number }>;
+      sortableChildren: boolean;
       addChild(text: PIXI.Text): unknown;
       removeChild(text: PIXI.Text): unknown;
+      sortChildren(): void;
     } | null;
   };
 

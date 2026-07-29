@@ -39,13 +39,20 @@ describe("FloatingResourceTextRenderer", () => {
   });
 });
 
-function createPixiFixture(animationResult: "resolve" | "reject" = "resolve") {
+function createPixiFixture(
+  animationResult: "resolve" | "reject" = "resolve",
+  children: ReadonlyArray<{ zIndex: number }> = [{ zIndex: 0 }, { zIndex: 100 }, { zIndex: 700 }],
+  sortableChildren = true,
+) {
   const anchorSet = vi.fn();
   const positionSet = vi.fn();
   const destroy = vi.fn();
-  const text = { alpha: 1, y: 80, anchor: { set: anchorSet }, position: { set: positionSet }, destroy };
-  const addChild = vi.fn();
+  const text = { alpha: 1, y: 80, zIndex: 0, anchor: { set: anchorSet }, position: { set: positionSet }, destroy };
+  const addChild = vi.fn((addedText: typeof text) => {
+    expect(addedText.zIndex).toBe(children.length === 0 ? 1 : 701);
+  });
   const removeChild = vi.fn();
+  const sortChildren = vi.fn();
   const animate = animationResult === "resolve"
     ? vi.fn().mockResolvedValue(true)
     : vi.fn().mockRejectedValue(new Error("teardown"));
@@ -57,12 +64,26 @@ function createPixiFixture(animationResult: "resolve" | "reject" = "resolve") {
     strokeThickness: 5,
   };
   const textFactory = { create: vi.fn(() => text) };
+  const container = { children, sortableChildren, addChild, removeChild, sortChildren };
   const dependencies = {
     textFactory,
-    container: () => ({ addChild, removeChild }),
+    container: () => container,
     animation: { animate },
   } satisfies PixiFloatingTextDependencies;
-  return { dependencies, text, style, anchorSet, positionSet, addChild, removeChild, destroy, animate, textFactory };
+  return {
+    dependencies,
+    text,
+    style,
+    anchorSet,
+    positionSet,
+    addChild,
+    removeChild,
+    sortChildren,
+    destroy,
+    animate,
+    textFactory,
+    container,
+  };
 }
 
 describe("PixiFloatingTextPort", () => {
@@ -78,13 +99,31 @@ describe("PixiFloatingTextPort", () => {
     expect(fixture.textFactory.create).toHaveBeenCalledWith("-10", fixture.style);
     expect(fixture.anchorSet).toHaveBeenCalledWith(0.5);
     expect(fixture.positionSet).toHaveBeenCalledWith(120, 80);
+    expect(fixture.text.zIndex).toBe(701);
     expect(fixture.addChild).toHaveBeenCalledWith(fixture.text);
+    expect(fixture.sortChildren).toHaveBeenCalledOnce();
+    expect(fixture.container.sortableChildren).toBe(true);
     expect(fixture.animate).toHaveBeenCalledWith([
       { parent: fixture.text, attribute: "y", to: 20 },
       { parent: fixture.text, attribute: "alpha", to: 0 },
     ], { duration: 1500 });
     expect(fixture.removeChild).toHaveBeenCalledWith(fixture.text);
     expect(fixture.destroy).toHaveBeenCalledOnce();
+  });
+
+  it("uses zIndex 1 for an empty non-sortable container", async () => {
+    const fixture = createPixiFixture("resolve", [], false);
+    const port = new PixiFloatingTextPort(fixture.dependencies);
+    await port.create({ x: 120, y: 80 }, "-10", {
+      distance: 60,
+      duration: 1500,
+      textStyle: fixture.style,
+    });
+
+    expect(fixture.text.zIndex).toBe(1);
+    expect(fixture.addChild).toHaveBeenCalledWith(fixture.text);
+    expect(fixture.sortChildren).not.toHaveBeenCalled();
+    expect(fixture.container.sortableChildren).toBe(false);
   });
 
   it("removes and destroys PIXI text when animation rejects", async () => {

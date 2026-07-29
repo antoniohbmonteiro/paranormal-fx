@@ -55,6 +55,7 @@ export class FloatingResourceTextRenderer {
 interface PixiTextLike {
   alpha: number;
   y: number;
+  zIndex: number;
   anchor: { set(value: number): void };
   position: { set(x: number, y: number): void };
   destroy(): void;
@@ -65,8 +66,11 @@ interface PixiTextFactory {
 }
 
 interface InterfaceContainer {
+  children: ReadonlyArray<{ zIndex: number }>;
+  sortableChildren: boolean;
   addChild(text: PixiTextLike): unknown;
   removeChild(text: PixiTextLike): unknown;
+  sortChildren(): void;
 }
 
 interface AnimationRunner {
@@ -98,8 +102,14 @@ export class PixiFloatingTextPort implements FloatingTextPort {
     try {
       text.anchor.set(0.5);
       text.position.set(position.x, position.y);
+      const topZIndex = container.children.reduce(
+        (highest, child) => Math.max(highest, child.zIndex),
+        0,
+      ) + 1;
+      text.zIndex = topZIndex;
       container.addChild(text);
       added = true;
+      if (container.sortableChildren) container.sortChildren();
       await this.dependencies.animation.animate(
         [
           { parent: text, attribute: "y", to: position.y - options.distance },
