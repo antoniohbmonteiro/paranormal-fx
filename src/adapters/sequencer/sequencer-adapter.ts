@@ -2,6 +2,8 @@ import { MODULE_ID } from "../../config/module-constants";
 import { logger } from "../../core/logger";
 import type { RitualFxPreset } from "../../features/ritual-fx/ritual-fx-preset";
 import type { RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
+import type { WeaponFxDefinition } from "../../features/weapon-fx/weapon-fx-catalog";
+import type { WeaponFxContext } from "../../features/weapon-fx/weapon-fx-context-resolver";
 
 type SequenceConstructor = new (options?: Record<string, unknown>) => SequenceLike;
 
@@ -14,9 +16,12 @@ interface SequenceEffectLike {
   file(path: string): SequenceEffectLike;
   name(name: string): SequenceEffectLike;
   atLocation(location: unknown): SequenceEffectLike;
-  stretchTo(location: unknown): SequenceEffectLike;
+  stretchTo(location: unknown, options?: { onlyX: boolean }): SequenceEffectLike;
   rotateTowards(location: unknown): SequenceEffectLike;
   scale(value: number): SequenceEffectLike;
+  anchor(value: { x: number; y: number }): SequenceEffectLike;
+  size(value: number, options: { gridUnits: boolean }): SequenceEffectLike;
+  xray(enabled: boolean): SequenceEffectLike;
   waitUntilFinished(offset?: number): SequenceEffectLike;
 }
 
@@ -26,6 +31,22 @@ function getSequenceConstructor(): SequenceConstructor | null {
 }
 
 export class SequencerAdapter {
+  async playWeaponEffect(definition: WeaponFxDefinition, context: WeaponFxContext): Promise<void> {
+    const Sequence = getSequenceConstructor();
+    if (!Sequence) return;
+    const sequence = new Sequence({ moduleName: MODULE_ID });
+    const effect = sequence.effect().file(definition.effectPath).atLocation(context.source).xray(false);
+    if (definition.mode === "melee") {
+      effect.rotateTowards(context.target).anchor({ x: 0.4, y: 0.5 })
+        .size(5 * context.source.w / context.gridSize, { gridUnits: true });
+    } else if (definition.mode === "line") {
+      effect.stretchTo(context.target, { onlyX: true });
+    } else {
+      effect.stretchTo(context.target);
+    }
+    await sequence.play();
+  }
+
   async playRitualPreset(preset: RitualFxPreset, placement: RitualFxPlacement): Promise<void> {
     const Sequence = getSequenceConstructor();
     if (!Sequence) {

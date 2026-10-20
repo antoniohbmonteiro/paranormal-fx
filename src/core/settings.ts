@@ -3,9 +3,15 @@ import { MODULE_ID } from "../config/module-constants";
 export const SETTINGS = {
   debug: "debug",
   resourceFeedback: "resourceFeedback",
+  weaponAnimations: "weaponAnimations",
 } as const;
 
 export function registerSettings(): void {
+  game.settings.register(MODULE_ID, SETTINGS.weaponAnimations, {
+    name: "Animações automáticas de armas",
+    hint: "Reproduz animações JB2A para armas reconhecidas em ataques públicos com alvo válido.",
+    scope: "world", config: true, type: Boolean, default: true,
+  });
   game.settings.register(MODULE_ID, SETTINGS.debug, {
     name: "Debug",
     hint: "Exibe logs detalhados do Paranormal FX no console.",
@@ -22,6 +28,14 @@ export function registerSettings(): void {
     type: Boolean,
     default: true,
   });
+}
+
+export function isWeaponAnimationsEnabled(): boolean {
+  try {
+    return Boolean(game.settings.get(MODULE_ID, SETTINGS.weaponAnimations));
+  } catch {
+    return false;
+  }
 }
 
 export function isResourceFeedbackEnabled(): boolean {

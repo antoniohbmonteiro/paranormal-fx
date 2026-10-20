@@ -1,5 +1,41 @@
 # Roadmap
 
+## Em desenvolvimento — animações automáticas de armas v1
+
+- Catálogo fechado de 38 armas, com 26 datapaths do JB2A Free; sete armas sem associação.
+- Hook local `paranormal-toolkit.attack.published` v1 para ataques nativos e gerenciados.
+- Um efeito no primeiro ataque elegível de cada acionamento; sem replay de cards.
+- Setting mundial **Animações automáticas de armas**, habilitado por padrão.
+- Seleção de distância e variantes delegada ao Sequencer; melee orientado, projéteis
+  esticados ao alvo e Lança-chamas com escala transversal preservada.
+- Ataques privados, tokens ocultos e referências ausentes/ambíguas não são animados.
+- Sem mudanças mecânicas, migração de flags, editor de associações ou assets distribuídos.
+
+Validação automatizada em 20/10/2026: `npm run check` passou com 195 testes,
+typecheck e build, incluindo referências locais do JB2A Free 0.9.4, Sequencer
+4.3.0 e compêndio Ordem 8.0.2. A regressão de rituais cobre as três formas de
+Eletrocussão e o intervalo de 500 ms. O Toolkit passou com 1.331 testes e as
+referências locais do Ordem/Foundry 14.369 habilitadas.
+
+### Validação manual pendente
+
+A porta local 30000 não estava acessível durante a implementação. A verificação
+de arquivos JB2A e os testes com fontes do Foundry/Ordem não substituem um mundo real.
+Antes de considerar a feature validada em mesa, verificar em Foundry v14 com GM,
+jogador executor e um terceiro jogador:
+
+- Pistola, Fuzil de Assalto, Espingarda e Bazuca: um efeito por acionamento.
+- Snipe em distâncias diferentes e Katana em ataques sucessivos, conferindo variantes.
+- Melee, Acha/halberd, Corrente/flail e largura/orientação da linha do Lança-chamas.
+- Ataques nativos, do card Toolkit, diretos, de jogador e GM; cancelamento do diálogo.
+- Vários ataques/alvos, inclusive primeira entrada cancelada/sem alvo: primeiro válido somente.
+- Reações e acerto/erro/crítico: nenhum resultado exposto pelo efeito ou duplicação.
+- Privado/cego/pessoal, tokens ocultos, fog e níveis: nenhum vazamento visual ao terceiro cliente.
+- Alvo removido ou ambíguo e arma sem associação: silêncio; reload do chat: nenhum replay.
+- Eletrocussão Padrão, Discente e Verdadeira (500 ms entre raios), além de dano/cura flutuantes.
+
+O projeto ainda não recebeu bump de versão ou publicação por esta implementação.
+
 ## 0.3.0
 
 - Exibir texto flutuante nativo de dano e cura pela variação final de PV/HP.

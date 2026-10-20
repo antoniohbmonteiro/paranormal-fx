@@ -6,6 +6,7 @@ import { registerRitualFxListeners } from "./features/ritual-fx/ritual-fx-listen
 import { registerResourceFeedbackListeners } from "./features/resource-feedback/resource-feedback-listener";
 import { ritualFxRegistry } from "./features/ritual-fx/ritual-fx-registry";
 import { getDefaultRitualFxPresets } from "./features/ritual-fx/presets/default-presets";
+import { registerWeaponFxListeners } from "./features/weapon-fx/weapon-fx-listener";
 
 Hooks.once("init", () => {
   registerSettings();
@@ -18,5 +19,6 @@ Hooks.once("ready", () => {
   if (!validateRuntimeDependencies()) return;
 
   registerRitualFxListeners();
+  registerWeaponFxListeners();
   logger.info(`${MODULE_TITLE} ready.`);
 });

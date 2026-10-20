@@ -29,6 +29,47 @@ Responsabilidades:
 - usar assets JB2A instalados pelo usuário;
 - manter efeitos opcionais e configuráveis no futuro.
 
+## Animações automáticas de armas
+
+O catálogo de armas em desenvolvimento reconhece 38 nomes originais do compêndio
+Armamentos do Ordem, sem configurar itens, importar associações ou modificar o
+compêndio. O reconhecimento aceita diferenças de caixa, acentos e espaços externos;
+nomes com sufixos, pontuação alterada ou modificações adicionadas ao nome não correspondem.
+
+Com **Animações automáticas de armas** habilitado nas configurações do mundo
+(padrão), um ataque público publicado com origem e alvo válidos reproduz um único
+efeito. Em acionamentos com vários ataques/alvos, somente o primeiro ataque válido
+é animado. Acerto, erro, crítico e reação pendente usam a mesma animação.
+Abrir ou cancelar o configurador não inicia efeitos; rolar/aplicar dano e
+recarregar o chat também não os repetem.
+
+Armas de fogo, arcos, bestas e bazuca usam projéteis entre os tokens. O Sequencer
+resolve as variantes de distância. As armas corpo a corpo são orientadas ao alvo,
+com seleção nativa das variantes da coleção. Lança-chamas usa uma linha visual,
+sem área mecânica. Acha usa halberd e Corrente usa flail como aproximação visual.
+
+Picareta, Gancho de Carne, Nunchaku, Motoserra, Pregador Pneumático, Estilingue e
+Shuriken não têm associação na v1 e são ignorados silenciosamente. O catálogo
+completo está em `src/features/weapon-fx/weapon-fx-catalog.ts`.
+
+Ataques privados, cegos ou pessoais, tokens ocultos, outra cena, canvas indisponível
+e alvos ausentes/ambíguos não produzem animação. Em ataques nativos, múltiplos tokens
+vinculados ao mesmo Actor podem impedir a resolução exata do alvo; o efeito é omitido.
+O contexto gerenciado do Toolkit preserva o token original. O FX mantém a máscara
+de visão do Sequencer e não usa resultados de ataque para decidir o efeito.
+
+Somente o cliente executor inicia a sequência; o Sequencer a propaga aos demais.
+Não há socket próprio nem fallback pelo HTML do chat. A integração requer uma
+versão do Toolkit com o hook `paranormal-toolkit.attack.published` v1 (consulte
+`docs/integration-with-ordem.md` no Toolkit). Versões antigas não iniciam esta
+automação; os listeners existentes de rituais permanecem independentes.
+
+Os 26 datapaths foram conferidos no JB2A Free 0.9.4 e o comportamento do banco foi
+investigado no Sequencer 4.3.0. Assets ausentes afetam somente sua associação,
+com diagnóstico no console e sem repetição automática. Nenhum asset é distribuído.
+Enquadramento final e privacidade em três clientes ainda exigem a validação manual
+registrada no roadmap; testes automatizados não comprovam renderização ou sockets.
+
 ## Texto flutuante de dano e cura
 
 A versão 0.3.0 exibe números nativos sobre Tokens quando o valor real de PV/HP de
@@ -134,6 +175,20 @@ Valide o projeto:
 npm run check
 ```
 
+Os testes de referência opcionais leem instalações locais, sem modificar seus arquivos:
+
+| Variável de ambiente | Diretório esperado |
+|---|---|
+| `PARANORMAL_FX_JB2A_REFERENCE` | Módulo `JB2A_DnD5e`, contendo `scripts/jb2a_sequencer.js` e `Library/` |
+| `PARANORMAL_FX_SEQUENCER_REFERENCE` | Módulo `sequencer`, contendo `dist/sequencer.js.map` |
+| `PARANORMAL_FX_ORDEM_REFERENCE` | Checkout do sistema, contendo `packs/_source/armaments/` |
+
+Defina essas variáveis antes de `npm run check` para incluir conferência dos 45
+armamentos, arquivos das 38 associações, registro dos datapaths e resolução nativa
+de variantes/distância. As rotinas do banco rodam em memória com infraestrutura
+simulada, sem canvas ou socket. Sem as variáveis, somente as respectivas suites de
+referência são ignoradas; a cobertura unitária continua ativa.
+
 Gere o bundle:
 
 ```bash
@@ -159,6 +214,7 @@ src/
   features/
     resource-feedback/
     ritual-fx/
+    weapon-fx/
   types/
 ```
 

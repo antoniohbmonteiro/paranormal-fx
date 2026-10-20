@@ -30,7 +30,7 @@ declare global {
       id: string;
     };
     modules: Map<string, { active: boolean }>;
-    user: import("../features/resource-feedback/resource-feedback-types").ResourceUserLike;
+    user: import("../features/resource-feedback/resource-feedback-types").ResourceUserLike & { id?: string };
     settings: {
       register(moduleId: string, key: string, data: Record<string, unknown>): void;
       get(moduleId: string, key: string): unknown;
@@ -43,6 +43,8 @@ declare global {
   };
 
   const canvas: {
+    grid?: { size: number };
+    tokens?: { get(id: string): import("../features/resource-feedback/resource-feedback-types").ResourceTokenLike | undefined };
     ready: boolean;
     scene: import("../features/resource-feedback/resource-feedback-types").ResourceSceneLike | null;
     interface: {
@@ -62,4 +64,5 @@ declare global {
   };
 
   var Sequence: unknown | undefined;
+  var Sequencer: { Database?: import("../adapters/sequencer/sequencer-database-adapter").SequencerDatabaseLike } | undefined;
 }
