@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.3.0
+0.4.0
 ```
 
 ## Objetivo
@@ -31,7 +31,7 @@ Responsabilidades:
 
 ## Animações automáticas de armas
 
-O catálogo de armas em desenvolvimento reconhece 38 nomes originais do compêndio
+O catálogo da versão 0.4.0 reconhece 38 nomes originais do compêndio
 Armamentos do Ordem, sem configurar itens, importar associações ou modificar o
 compêndio. O reconhecimento aceita diferenças de caixa, acentos e espaços externos;
 nomes com sufixos, pontuação alterada ou modificações adicionadas ao nome não correspondem.
@@ -59,16 +59,17 @@ O contexto gerenciado do Toolkit preserva o token original. O FX mantém a másc
 de visão do Sequencer e não usa resultados de ataque para decidir o efeito.
 
 Somente o cliente executor inicia a sequência; o Sequencer a propaga aos demais.
-Não há socket próprio nem fallback pelo HTML do chat. A integração requer uma
-versão do Toolkit com o hook `paranormal-toolkit.attack.published` v1 (consulte
-`docs/integration-with-ordem.md` no Toolkit). Versões antigas não iniciam esta
-automação; os listeners existentes de rituais permanecem independentes.
+Não há socket próprio nem fallback pelo HTML do chat. Esta versão requer
+**Paranormal Toolkit 0.48.0 ou superior**, que publica o hook
+`paranormal-toolkit.attack.published` v1 (consulte `docs/integration-with-ordem.md`
+no Toolkit). A versão mínima também é declarada no manifesto do módulo.
 
 Os 26 datapaths foram conferidos no JB2A Free 0.9.4 e o comportamento do banco foi
 investigado no Sequencer 4.3.0. Assets ausentes afetam somente sua associação,
 com diagnóstico no console e sem repetição automática. Nenhum asset é distribuído.
-Enquadramento final e privacidade em três clientes ainda exigem a validação manual
-registrada no roadmap; testes automatizados não comprovam renderização ou sockets.
+O usuário confirmou os testes manuais da funcionalidade no Foundry antes da release.
+O roadmap conserva os cenários de regressão para futuras validações em mesa;
+testes automatizados não substituem a verificação de renderização e sockets.
 
 ## Texto flutuante de dano e cura
 
@@ -95,9 +96,9 @@ atualizados para não produzir um delta acumulado ao reativá-lo.
 
 Dependências atuais:
 
-- Paranormal Toolkit
+- Paranormal Toolkit 0.48.0 ou superior
 - Sequencer
-- JB2A
+- JB2A Free (`JB2A_DnD5e`)
 
 A biblioteca JB2A deve estar instalada e ativa no Foundry. Este módulo não empacota assets da JB2A.
 
@@ -286,3 +287,10 @@ Assets, animações e sons de terceiros não são redistribuídos por este módu
 - Aplica regras locais de permissão e visibilidade para evitar feedback indevido.
 - Adiciona setting de cliente e testes unitários para resolução, snapshots,
   Tokens, policy e service.
+
+### 0.4.0
+
+- Adiciona animações automáticas para 38 armas do compêndio Armamentos, sem configuração por item.
+- Consome o hook público de ataques do Toolkit 0.48.0+, com uma animação por acionamento público e referências válidas de origem/alvo.
+- Delega variantes e distâncias ao Sequencer, mantém sete armas sem associação e preserva Eletrocussão e o feedback de dano/cura.
+- Inclui setting mundial de ativação e testes de regressão; testes manuais no Foundry confirmados pelo usuário antes da release.

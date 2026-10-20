@@ -1,9 +1,10 @@
 # Roadmap
 
-## Em desenvolvimento — animações automáticas de armas v1
+## 0.4.0 — animações automáticas de armas v1
 
 - Catálogo fechado de 38 armas, com 26 datapaths do JB2A Free; sete armas sem associação.
 - Hook local `paranormal-toolkit.attack.published` v1 para ataques nativos e gerenciados.
+- Requisito mínimo de Paranormal Toolkit 0.48.0 declarado no manifesto.
 - Um efeito no primeiro ataque elegível de cada acionamento; sem replay de cards.
 - Setting mundial **Animações automáticas de armas**, habilitado por padrão.
 - Seleção de distância e variantes delegada ao Sequencer; melee orientado, projéteis
@@ -17,12 +18,12 @@ typecheck e build, incluindo referências locais do JB2A Free 0.9.4, Sequencer
 Eletrocussão e o intervalo de 500 ms. O Toolkit passou com 1.331 testes e as
 referências locais do Ordem/Foundry 14.369 habilitadas.
 
-### Validação manual pendente
+### Validação manual e cenários de regressão
 
-A porta local 30000 não estava acessível durante a implementação. A verificação
-de arquivos JB2A e os testes com fontes do Foundry/Ordem não substituem um mundo real.
-Antes de considerar a feature validada em mesa, verificar em Foundry v14 com GM,
-jogador executor e um terceiro jogador:
+O usuário confirmou os testes manuais da funcionalidade no Foundry antes da
+release 0.4.0. A lista abaixo permanece como referência para futuras regressões
+em Foundry v14 com GM, jogador executor e um terceiro jogador; testes com fontes
+do Foundry/Ordem não substituem um mundo real.
 
 - Pistola, Fuzil de Assalto, Espingarda e Bazuca: um efeito por acionamento.
 - Snipe em distâncias diferentes e Katana em ataques sucessivos, conferindo variantes.
@@ -33,8 +34,6 @@ jogador executor e um terceiro jogador:
 - Privado/cego/pessoal, tokens ocultos, fog e níveis: nenhum vazamento visual ao terceiro cliente.
 - Alvo removido ou ambíguo e arma sem associação: silêncio; reload do chat: nenhum replay.
 - Eletrocussão Padrão, Discente e Verdadeira (500 ms entre raios), além de dano/cura flutuantes.
-
-O projeto ainda não recebeu bump de versão ou publicação por esta implementação.
 
 ## 0.3.0
 
