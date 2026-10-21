@@ -108,6 +108,8 @@ jobs:
             [ -d "$dir" ] && cp -R "$dir" "$staging_dir/$dir"
           done
 
+          find "$staging_dir/dist" -type f -name '*.map' -delete
+
           (cd "$staging_dir" && zip -qr "../$zip_name" .)
 
           unzip -l ".release/$zip_name"
@@ -117,7 +119,7 @@ jobs:
             exit 1
           fi
 
-          if unzip -l ".release/$zip_name" | grep -E '(^|[[:space:]])(src/|node_modules/|package\.json|package-lock\.json|vite\.config|tsconfig\.json)' >/dev/null; then
+          if unzip -Z1 ".release/$zip_name" | grep -E '(^|/)(src|tests|node_modules)/|\.map$|(^|/)(package(-lock)?\.json|vite\.config[^/]*|tsconfig[^/]*\.json)$' >/dev/null; then
             echo "Release zip contains development-only files." >&2
             exit 1
           fi

@@ -1,5 +1,93 @@
 # Roadmap
 
+## 0.5.0 — sons automáticos de armas com PSFX
+
+- Perfis sonoros associados ao catálogo existente, sem ampliar suas 38 armas.
+- Seleção por disponibilidade: Rifle/Shotgun/Musket → Revolver → somente visual.
+- Sons gratuitos de Sword, Spear, Light/Heavy Swoosh e Longbow; Acha e Montante
+  usam Heavy. As variantes permanecem sob controle do Sequencer.
+- Uma sequência por acionamento, com visual antes do áudio e sem espera sonora
+  para iniciar o visual; falha de montagem sonora usa uma sequência visual nova,
+  ainda não iniciada. Nenhuma tentativa de recuperação repete um visual iniciado.
+- Armas automáticas usam 20 disparos a cada 100 ms e ganho de 0,5 por disparo.
+  Isso independe da opção mecânica Rajada. Espingarda de Cano Duplo usa um som.
+- Settings mundiais de ativação (ligado) e volume (50%), aplicados sem recarga.
+  O mute individual usa os controles existentes do Foundry/Sequencer.
+- PSFX opcional, consulta silenciosa e invalidação de cache por namespace.
+- Pré-carregamento local em segundo plano dos arquivos dos perfis utilizados,
+  incluindo variantes, faixas do Longbow e candidatos pagos registrados. Máximo
+  de dois arquivos simultâneos, sem barra, reprodução ou socket próprio.
+- Besta/Balestra usam Longbow, conforme ajuste solicitado pelo usuário;
+  Bazuca/Lança-chamas não têm associação sonora nesta versão.
+- Nenhuma mudança no Toolkit, Ordem, flags persistidas ou resultado dos ataques;
+  nenhum asset redistribuído ou dependência npm acrescentada.
+
+As responsabilidades estão divididas entre catálogo visual (associação), perfis
+sonoros (dados), resolver (candidatos e volume), service (elegibilidade e reserva
+do acionamento), banco (disponibilidade) e adapter (composição da sequência).
+Os hooks e payloads públicos permanecem os mesmos.
+
+### Validação automatizada
+
+Em 21/10/2026, `npm run check` passou com typecheck, 329 testes em 19 suites e
+build, com referências locais de JB2A Free 0.9.4, PSFX Free 0.18.0, Sequencer
+4.3.0 e Ordem 8.0.2 habilitadas. As regressões abrangem perfis e fallbacks, rajadas,
+fila limitada, deduplicação, candidatos pagos opcionais, falhas, registro tardio
+do banco e pausa/retomada por configuração.
+
+As referências de PSFX Free 0.18.0 e Sequencer 4.3.0 confirmam arquivos gratuitos,
+coleções e faixas do Longbow. O runtime Foundry substituído cobre repetição nativa,
+visual iniciado durante carregamento sonoro pendente, falha de execução sonora
+injetada no agendador e propagação solicitada antes da reprodução local, inclusive
+com o executor silenciado. Esses testes não reproduzem áudio nem usam sockets.
+Rifle, Shotgun e Musket são candidatos não validados na edição paga; fixtures
+unitárias verificam sua preferência quando presentes, sem afirmar acesso a assets.
+
+### Validação manual e cenários de regressão
+
+O usuário confirmou testes da funcionalidade no Foundry e aprovou o resultado
+antes da release 0.5.0. A configuração final solicitada é de 20 tiros a cada 100 ms,
+com Longbow também em Besta/Balestra. Essa confirmação não comprova individualmente
+todos os cenários abaixo, especialmente multiplayer, cache frio e edição paga.
+Mantê-los como regressões em Foundry v14 com GM, jogador executor e terceiro
+cliente, usando Sequencer, JB2A Free e PSFX Free:
+
+- Conferir todos os perfis, variantes e sincronização entre som e animação,
+  incluindo Sword/Spear com seu silêncio inicial e Longbow nas cinco faixas.
+- Validar o padrão solicitado de 20 disparos com intervalo de 100 ms, mantendo uma
+  única animação e volume por disparo de 25% no padrão mundial de 50%.
+  Avaliar transientes, caudas sobrepostas, volume e sincronização.
+  Repetir com Rifle quando
+  esse asset estiver legitimamente disponível.
+- Conferir `psfx.ranged-weapons.longbow.v1` junto da animação existente
+  `jb2a.bolt.physical.orange`, fornecendo origem/destino e `globalSound(true)`.
+  Besta/Balestra agora recebem o perfil `longbow` no catálogo por solicitação
+  do usuário; confirmar a reprodução e sincronização sonora em mesa.
+- Verificar ausência/desativação do PSFX, datapath inexistente e arquivo registrado
+  inválido: o visual permanece, sem replay. Não presumir que `softFail` resolve
+  erros internos de carregamento do Sequencer/Foundry.
+- Verificar volume mundial zero, ativação/desativação sem recarga, volume local e
+  mute do executor sem silenciar os outros dois clientes.
+- Entrar com cache frio e liberar o áudio do navegador antes de atacar; conferir
+  o pré-carregamento dos 30 sons gratuitos e de cada candidato pago disponível,
+  com até dois arquivos em andamento por cliente. Comparar a primeira rajada após
+  o carregamento com as seguintes, incluindo um jogador que entra depois do GM.
+- Conferir ausência de downloads de sons fora do catálogo ou vídeos; mudar volume
+  de zero para positivo e registrar novamente o banco PSFX deve retomar a fila sem
+  baixar novamente os arquivos já concluídos ou em andamento.
+- Conferir uma reprodução por cliente, primeiro alvo válido em múltiplos ataques,
+  duplicação do evento e atualização/reabertura do chat sem replay.
+- Privado/cego/pessoal, alvo ausente, referências ambíguas, outra cena, tokens
+  ocultos inclusive em ataques do GM, fog e níveis: conferir ausência de vazamento.
+- Revalidar as três formas de Eletrocussão, intervalo de 500 ms e feedback de
+  dano/cura, sem alterações em custos, rolagens, dano, munição ou recursos.
+- Em instalação paga autorizada, confirmar os datapaths exatos de Rifle, Shotgun
+  e Musket sob `psfx`, suas variantes, reprodução e prioridade sobre Revolver.
+
+O áudio é agendado na mesma sequência do visual, mas cache frio, latência de rede
+e bloqueio de áudio do navegador podem afetar o primeiro uso. Os testes automatizados
+e a aprovação geral do usuário não substituem a conferência dos cenários individuais.
+
 ## 0.4.0 — animações automáticas de armas v1
 
 - Catálogo fechado de 38 armas, com 26 datapaths do JB2A Free; sete armas sem associação.

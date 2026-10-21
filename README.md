@@ -13,7 +13,7 @@ Projeto em fase inicial.
 Versão atual:
 
 ```txt
-0.4.0
+0.5.0
 ```
 
 ## Objetivo
@@ -71,6 +71,101 @@ O usuário confirmou os testes manuais da funcionalidade no Foundry antes da rel
 O roadmap conserva os cenários de regressão para futuras validações em mesa;
 testes automatizados não substituem a verificação de renderização e sockets.
 
+## Sons automáticos de armas
+
+As animações de armas podem incluir áudio opcional do **PSFX** instalado pelo
+usuário. O PSFX não é obrigatório e nenhum arquivo de áudio é distribuído pelo FX.
+Se o banco não contiver um som compatível, a animação permanece funcionando.
+
+Para usar os sons gratuitos, abra **Módulos complementares → Instalar módulo**
+no Foundry e procure **PSFX - Peri's Sound Effects**, ou informe o manifesto:
+
+```text
+https://github.com/JimHPerry/psfx/releases/latest/download/module.json
+```
+
+Ative PSFX no mundo junto de Paranormal FX, Paranormal Toolkit, Sequencer e JB2A
+Free. Os sons já ficam habilitados nas configurações do FX, sem configurar cada
+arma ou escolher uma edição do PSFX. Consulte o [projeto PSFX](https://github.com/JimHPerry/psfx)
+para instalação, documentação e acesso legítimo aos sons adicionais.
+
+Os perfis sonoros ficam associados ao catálogo visual existente. Pistolas e
+revólveres usam `psfx.ranged-weapons.guns.single-fire.revolver`. Armas automáticas
+preferem `psfx.ranged-weapons.guns.single-fire.rifle`, espingardas preferem
+`psfx.ranged-weapons.guns.single-fire.shotgun`, e fuzis de caça/precisão preferem
+`psfx.ranged-weapons.guns.single-fire.musket`. Cada um desses três perfis usa
+Revolver como fallback quando o candidato específico está ausente. A seleção
+consulta somente os datapaths registrados no Sequencer; não verifica edição,
+assinatura ou licença.
+
+Espada, Katana, Machete e Florete usam `psfx.weapon-attacks.sword.v1`; Lança usa
+`psfx.weapon-attacks.spear.v1`. Faca, Faca Tática, Punhal, Baioneta, Machadinha e
+Bastão Policial usam `psfx.weapon-swooshes.light.v1.group01`. Machado, Acha,
+Martelo, Marreta, Maça, Gadanho, Corrente, Bastão, Cajado e Montante usam
+`psfx.weapon-swooshes.heavy.v1.group01`. O Sequencer sorteia as variantes dessas
+coleções, sem fixar índices. Não há variação por acerto, erro ou crítico.
+
+Arco, Arco Composto, Besta e Balestra usam `psfx.ranged-weapons.longbow.v1`, com origem e destino
+para selecionar sua versão por distância. O som é global na cena, no canal de
+interface, sem atenuação por distância ou paredes. Bazuca e Lança-chamas
+permanecem somente visuais. O catálogo
+automático continua com 38 armas; as sete armas anteriormente sem associação
+não foram acrescentadas.
+
+Fuzil de Assalto, Submetralhadora e Metralhadora usam uma rajada sonora de
+**20 disparos com intervalo de 100 ms**, com metade do ganho por disparo. Isso
+vale para cada acionamento dessas armas, independentemente da opção mecânica
+Rajada do Toolkit. Não são criados ataques nem efeitos visuais adicionais.
+Espingarda de Cano Duplo reproduz um único som.
+
+Nas configurações do mundo, **Sons automáticos de armas** começa habilitado e
+**Volume dos sons de armas** começa em 50%. As mudanças valem nos próximos
+acionamentos, sem recarga. Desativar sons ou definir volume zero preserva os
+efeitos visuais. Com o padrão de 50%, cada disparo de rajada usa volume 25%.
+Cada participante também pode ajustar o áudio de interface no Foundry ou
+desabilitar sons no Sequencer, respeitando a recarga solicitada por esse módulo.
+Silenciar localmente o atacante não suprime o envio do som aos outros clientes.
+
+Som e visual são montados na mesma sequência, iniciada somente pelo executor.
+Os filtros de privacidade, tokens ocultos, contexto e duplicação são os mesmos
+das animações. Uma falha ao montar áudio descarta a sequência ainda não iniciada
+e monta somente o visual. Após iniciar a reprodução, o FX não repete a animação
+para tentar recuperar um som. O efeito visual é agendado antes do áudio, sem
+aguardar seu carregamento ou conclusão. Erros de carregamento do próprio
+Sequencer/Foundry podem gerar diagnósticos desses módulos.
+
+O cache de disponibilidade é invalidado quando os namespaces `psfx` ou `jb2a`
+são registrados novamente; isso vale para os próximos ataques e não reproduz
+ações anteriores. Não é necessário reiniciar o FX para reconhecer novos registros.
+
+Cada cliente também pré-carrega em segundo plano os arquivos dos perfis sonoros
+usados pelo catálogo, incluindo todas as variantes e distâncias. São considerados
+os candidatos gratuitos e Rifle/Shotgun/Musket quando registrados na instalação.
+Não é carregada a biblioteca PSFX inteira nem as animações JB2A. No PSFX Free
+0.18.0, esse conjunto tem 30 arquivos, cerca de 0,6 MiB de download.
+
+O pré-carregamento usa o cache local nativo do Sequencer/Foundry, sem reproduzir
+sons, sem barra de progresso e com no máximo dois arquivos simultâneos. Começa
+ao entrar no mundo; novos registros do PSFX e alterações nas configurações de
+sons/volume/animações retomam a busca por arquivos ainda não carregados. Arquivos
+concluídos ou em andamento não são solicitados novamente pelo FX. Com animações
+ou sons desativados, ou volume mundial zero, novos carregamentos ficam pausados.
+Falhas são isoladas e podem ser tentadas novamente em uma solicitação posterior.
+
+Cada participante faz seu próprio carregamento ao entrar, sem depender de um GM
+forçar downloads para os outros. Ataques não aguardam essa fila. O navegador pode
+aguardar a primeira interação para liberar áudio; a melhora no primeiro uso depende
+de o carregamento já ter terminado e não elimina possíveis atrasos do vídeo JB2A.
+
+Referências verificadas: PSFX Free 0.18.0 e Sequencer 4.3.0. Revolver, Sword,
+Spear, Light/Heavy Swoosh e Longbow foram conferidos no banco e nos arquivos
+locais. **Rifle, Shotgun e Musket ainda não foram validados na edição paga.**
+Testes com runtime substituído verificam seleção, agendamento e propagação
+solicitada; não comprovam reprodução real em navegador ou sockets entre clientes.
+O usuário confirmou testes da funcionalidade no Foundry e aprovou o resultado
+antes da release 0.5.0. Essa confirmação não detalha todos os cenários de rede,
+cache frio, privacidade ou da biblioteca paga; eles seguem como regressões no roadmap.
+
 ## Texto flutuante de dano e cura
 
 A versão 0.3.0 exibe números nativos sobre Tokens quando o valor real de PV/HP de
@@ -101,6 +196,8 @@ Dependências atuais:
 - JB2A Free (`JB2A_DnD5e`)
 
 A biblioteca JB2A deve estar instalada e ativa no Foundry. Este módulo não empacota assets da JB2A.
+
+PSFX é uma integração **opcional** para áudio. Sua ausência não impede as animações.
 
 ## Compatibilidade
 
@@ -181,13 +278,16 @@ Os testes de referência opcionais leem instalações locais, sem modificar seus
 | Variável de ambiente | Diretório esperado |
 |---|---|
 | `PARANORMAL_FX_JB2A_REFERENCE` | Módulo `JB2A_DnD5e`, contendo `scripts/jb2a_sequencer.js` e `Library/` |
+| `PARANORMAL_FX_PSFX_REFERENCE` | Módulo PSFX Free, contendo `scripts/psfx_sequencer.js` e `library/` |
 | `PARANORMAL_FX_SEQUENCER_REFERENCE` | Módulo `sequencer`, contendo `dist/sequencer.js.map` |
 | `PARANORMAL_FX_ORDEM_REFERENCE` | Checkout do sistema, contendo `packs/_source/armaments/` |
 
 Defina essas variáveis antes de `npm run check` para incluir conferência dos 45
 armamentos, arquivos das 38 associações, registro dos datapaths e resolução nativa
-de variantes/distância. As rotinas do banco rodam em memória com infraestrutura
-simulada, sem canvas ou socket. Sem as variáveis, somente as respectivas suites de
+de variantes/distância. A referência PSFX com Sequencer também exercita as seções
+sonoras, intervalos de rajada e o agendamento visual antes do áudio. As rotinas
+rodam em memória com infraestrutura simulada, sem canvas, reprodução de áudio ou
+socket. Sem as variáveis, somente as respectivas suites de
 referência são ignoradas; a cobertura unitária continua ativa.
 
 Gere o bundle:
