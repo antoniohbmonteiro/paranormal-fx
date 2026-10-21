@@ -64,5 +64,8 @@ declare global {
   };
 
   var Sequence: unknown | undefined;
-  var Sequencer: { Database?: import("../adapters/sequencer/sequencer-database-adapter").SequencerDatabaseLike } | undefined;
+  var Sequencer: {
+    Database?: import("../adapters/sequencer/sequencer-database-adapter").SequencerDatabaseLike;
+    Preloader?: import("../adapters/sequencer/sequencer-adapter").SequencerPreloaderLike;
+  } | undefined;
 }

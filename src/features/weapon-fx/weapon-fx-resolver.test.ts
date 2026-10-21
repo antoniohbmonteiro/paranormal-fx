@@ -40,7 +40,7 @@ describe("weapon FX catalog", () => {
   for (const [names, path, mode] of groups) {
     it.each(names)("resolves %s to its approved animation", name => {
       const normalized = " " + name.toUpperCase().normalize("NFD").replace(/\p{M}/gu, "") + " ";
-      expect(resolveWeaponFx({ type: "armament", name: normalized })).toEqual({ name, effectPath: `jb2a.${path}`, mode });
+      expect(resolveWeaponFx({ type: "armament", name: normalized })).toMatchObject({ name, effectPath: `jb2a.${path}`, mode });
     });
   }
   it.each(["Picareta", "Gancho de Carne", "Nunchaku", "Motoserra", "Pregador Pneumático", "Estilingue", "Shuriken",

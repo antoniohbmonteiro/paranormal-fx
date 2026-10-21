@@ -4,12 +4,28 @@ import type { RitualFxPreset } from "../../features/ritual-fx/ritual-fx-preset";
 import type { RitualFxPlacement } from "../../features/ritual-fx/ritual-area-resolver";
 import type { WeaponFxDefinition } from "../../features/weapon-fx/weapon-fx-catalog";
 import type { WeaponFxContext } from "../../features/weapon-fx/weapon-fx-context-resolver";
+import type { WeaponSoundPlayback } from "../../features/weapon-fx/weapon-sound-profiles";
 
 type SequenceConstructor = new (options?: Record<string, unknown>) => SequenceLike;
 
+export interface SequencerPreloaderLike {
+  preload(files: string | string[], showProgressBar?: boolean): Promise<number | void> | void;
+}
+
 interface SequenceLike {
   effect(): SequenceEffectLike;
+  sound(): SequenceSoundLike;
   play(): Promise<void> | void;
+}
+
+interface SequenceSoundLike {
+  file(path: string): SequenceSoundLike;
+  volume(value: number): SequenceSoundLike;
+  delay(ms: number): SequenceSoundLike;
+  repeats(count: number, intervalMs: number): SequenceSoundLike;
+  atLocation(location: unknown): SequenceSoundLike;
+  toLocation(location: unknown): SequenceSoundLike;
+  globalSound(enabled: boolean): SequenceSoundLike;
 }
 
 interface SequenceEffectLike {
@@ -31,9 +47,34 @@ function getSequenceConstructor(): SequenceConstructor | null {
 }
 
 export class SequencerAdapter {
-  async playWeaponEffect(definition: WeaponFxDefinition, context: WeaponFxContext): Promise<void> {
+  async preloadSound(file: string): Promise<boolean> {
+    try {
+      const preloader = globalThis.Sequencer?.Preloader;
+      if (!preloader) return false;
+      return await preloader.preload(file, false) === 0;
+    } catch {
+      return false;
+    }
+  }
+
+  async playWeaponEffect(definition: WeaponFxDefinition, context: WeaponFxContext, sound?: WeaponSoundPlayback | null): Promise<void> {
     const Sequence = getSequenceConstructor();
     if (!Sequence) return;
+    let sequence = this.createWeaponSequence(Sequence, definition, context);
+    if (sound) {
+      try {
+        const audio = sequence.sound().file(sound.path).volume(sound.volume).delay(sound.delayMs);
+        if (sound.distanceBased) audio.atLocation(context.source).toLocation(context.target).globalSound(true);
+        if (sound.repetitions > 1) audio.repeats(sound.repetitions, sound.intervalMs);
+      } catch {
+        // Discard partially built audio before playback; never replay an already started visual.
+        sequence = this.createWeaponSequence(Sequence, definition, context);
+      }
+    }
+    await sequence.play();
+  }
+
+  private createWeaponSequence(Sequence: SequenceConstructor, definition: WeaponFxDefinition, context: WeaponFxContext): SequenceLike {
     const sequence = new Sequence({ moduleName: MODULE_ID });
     const effect = sequence.effect().file(definition.effectPath).atLocation(context.source).xray(false);
     if (definition.mode === "melee") {
@@ -44,7 +85,7 @@ export class SequencerAdapter {
     } else {
       effect.stretchTo(context.target);
     }
-    await sequence.play();
+    return sequence;
   }
 
   async playRitualPreset(preset: RitualFxPreset, placement: RitualFxPlacement): Promise<void> {
